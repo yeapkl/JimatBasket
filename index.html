@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JimatBasket — Compare Grocery Prices in Malaysia</title>
+  <meta name="description" content="Find the cheapest grocery prices at Malaysian supermarkets, hypermarkets and convenience stores. Compare, build a basket, and save." />
+  <meta name="theme-color" content="#0f9d58" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧺</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#" aria-label="JimatBasket home">
+        <span class="brand-mark">🧺</span>
+        <span>Jimat<b>Basket</b></span>
+      </a>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <button class="btn btn-ghost basket-btn" id="openBasket" aria-label="Open my basket">
+          🛒 <span class="hide-sm">My Basket</span> <span class="pill" id="basketCount">0</span>
+        </button>
+        <button class="btn btn-support" data-open-support>❤️ <span class="hide-sm">Support</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Malaysia grocery price comparison</p>
+        <h1>Find the cheapest groceries <span class="accent">near you</span>.</h1>
+        <p class="lede">Compare prices across supermarkets, hypermarkets &amp; convenience stores — cheapest always on top.</p>
+
+        <form class="search" id="searchForm" role="search" autocomplete="off">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input id="q" type="search" placeholder="Search e.g. beras, telur, minyak masak…" aria-label="Search groceries" />
+          <select id="state" aria-label="State">
+            <option value="">All states</option>
+          </select>
+        </form>
+
+        <div class="filters">
+          <div class="chips" id="storeTypes" role="group" aria-label="Store type">
+            <button class="chip active" data-type="">All stores</button>
+            <button class="chip" data-type="hypermarket">Hypermarket</button>
+            <button class="chip" data-type="supermarket">Supermarket</button>
+            <button class="chip" data-type="minimart">Mini market</button>
+            <button class="chip" data-type="convenience">Convenience</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div id="sampleBanner" class="notice" hidden>
+        <b>Demo data.</b> Prices shown are sample values for preview. Connect the free
+        <a href="https://data.gov.my/data-catalogue/pricecatcher" target="_blank" rel="noopener">KPDN PriceCatcher</a>
+        feed to show real daily prices.
+      </div>
+
+      <aside class="ad ad-banner" id="adTop" aria-label="Sponsored"></aside>
+
+      <section class="stats" id="stats"></section>
+
+      <div class="toolbar">
+        <div class="chips chips-scroll" id="categories" role="group" aria-label="Category"></div>
+        <label class="sort">
+          <span>Sort</span>
+          <select id="sort">
+            <option value="savings">Biggest savings</option>
+            <option value="price">Lowest price</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </label>
+      </div>
+
+      <p class="result-meta" id="resultMeta"></p>
+      <section class="grid" id="results" aria-live="polite"></section>
+      <div class="empty" id="empty" hidden>
+        <div class="empty-emoji">🥲</div>
+        <p>No matches. Try another word or pick “All states”.</p>
+      </div>
+
+      <section class="cta-support">
+        <div>
+          <h2>Like JimatBasket?</h2>
+          <p>It's free for everyone. Help keep it that way — share it with family, or chip in for server costs.</p>
+        </div>
+        <div class="cta-buttons">
+          <button class="btn btn-primary" data-open-support>❤️ Contribute</button>
+          <button class="btn btn-outline" id="shareBtn">🔗 Share</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <div class="brand small"><span class="brand-mark">🧺</span> Jimat<b>Basket</b></div>
+        <p class="muted" id="dataSource"></p>
+      </div>
+      <p class="muted small-print">Prices can change without notice and may differ in store. Always check the shelf price.
+        Not affiliated with any retailer. Store names are trademarks of their owners.</p>
+    </div>
+  </footer>
+
+  <!-- Product detail drawer -->
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="drawer" id="detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle" hidden>
+    <div class="drawer-head">
+      <div>
+        <p class="eyebrow" id="detailCat"></p>
+        <h2 id="detailTitle"></h2>
+        <p class="muted" id="detailUnit"></p>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body" id="detailBody"></div>
+  </aside>
+
+  <!-- Basket drawer -->
+  <aside class="drawer" id="basket" role="dialog" aria-modal="true" aria-labelledby="basketTitle" hidden>
+    <div class="drawer-head">
+      <div>
+        <p class="eyebrow">Plan your trip</p>
+        <h2 id="basketTitle">My Basket</h2>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body" id="basketBody"></div>
+  </aside>
+
+  <!-- Support modal -->
+  <div class="modal" id="support" role="dialog" aria-modal="true" aria-labelledby="supportTitle" hidden>
+    <div class="modal-card">
+      <button class="icon-btn modal-close" data-close aria-label="Close">✕</button>
+      <div class="modal-emoji">❤️</div>
+      <h2 id="supportTitle">Support JimatBasket</h2>
+      <p class="muted" id="supportMsg"></p>
+      <div class="support-links" id="supportLinks"></div>
+      <div id="supportQr"></div>
+      <p class="small-print muted">Not in a position to give? Sharing the site helps just as much. Terima kasih!</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
