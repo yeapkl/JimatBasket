@@ -7,6 +7,7 @@ The output is SAMPLE data so the site works out of the box. It is marked
 """
 import json
 import random
+import zlib
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -161,6 +162,52 @@ def main():
     OUT.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {OUT} ({len(items)} items, {len(stores)} stores, {len(prices)} prices)")
     write_history(today, items, prices)
+    write_online(today)
+
+
+def write_online(today):
+    """Demo data/online.json in the format scripts/fetch_online_prices.py writes."""
+    rnd = random.Random(7)  # separate stream: keeps prices.json unchanged
+    products = [
+        ("Milo Activ-Go Chocolate Malt Drink 1kg", "1kg", "Beverages", 23.90),
+        ("Nescafe Classic Instant Coffee 200g", "200g", "Beverages", 19.90),
+        ("Lipton Yellow Label Tea 100 Teabags", "100pcs", "Beverages", 12.50),
+        ("100PLUS Isotonic Drink 1.5L", "1.5L", "Beverages", 4.30),
+        ("Spritzer Natural Mineral Water 1.5L", "1.5L", "Beverages", 1.80),
+        ("Dutch Lady Full Cream Milk 1L", "1L", "Eggs & Dairy", 7.60),
+        ("Anchor Salted Butter 227g", "227g", "Eggs & Dairy", 12.90),
+        ("Farm Fresh Yogurt Plain 700g", "700g", "Eggs & Dairy", 10.90),
+        ("Gardenia Original Classic Bread 600g", "600g", "Bakery & Snacks", 4.70),
+        ("Maggi Kari Instant Noodles 5 x 79g", "5 x 79g", "Bakery & Snacks", 6.10),
+        ("Munchy's Lexus Cream Crackers 190g", "190g", "Bakery & Snacks", 5.40),
+        ("Ayam Brand Sardines in Tomato Sauce 425g", "425g", "Canned Food", 7.40),
+        ("Knife Cooking Oil 5kg", "5kg", "Cooking Essentials", 36.90),
+        ("Adabi Serbuk Kari Daging 250g", "250g", "Cooking Essentials", 5.90),
+        ("Jasmine Super Tempatan 5% Beras 5kg", "5kg", "Rice & Grains", 26.90),
+        ("Quaker Instant Oatmeal 800g", "800g", "Rice & Grains", 13.90),
+        ("Dynamo Power Gel Detergent 2.7kg", "2.7kg", "Household", 29.90),
+        ("Kleenex Ultra Soft Bath Tissue 10 Rolls", "10 rolls", "Household", 16.90),
+        ("Colgate Great Regular Flavour Toothpaste 175g", "175g", "Baby & Personal Care", 7.90),
+        ("Pampers Baby Dry Pants M 62s", "62pcs", "Baby & Personal Care", 54.90),
+    ]
+    retailers = {"Lotus's": 0.97, "AEON": 1.0, "Jaya Grocer": 1.1, "Mydin": 0.95}
+    out = []
+    for name, unit, cat, base in products:
+        key = "demo:" + name.lower()
+        offers = []
+        for r, factor in retailers.items():
+            if rnd.random() < 0.2:
+                continue
+            price = round(round(base * factor * rnd.uniform(0.93, 1.07) * 20) / 20, 2)
+            offers.append([r, price, "https://example.com/demo-product", 0 if rnd.random() < 0.08 else 1, today.isoformat()])
+        offers.sort(key=lambda o: o[1])
+        out.append({"key": key, "id": 1_000_000_000 + zlib.crc32(key.encode()) % 1_000_000_000,
+                    "name": name, "unit": unit, "category": cat, "offers": offers})
+    path = OUT.parent / "online.json"
+    path.write_text(json.dumps({"source": "sample", "asOf": today.isoformat(),
+                                "retailers": [{"name": r, "status": "demo"} for r in retailers],
+                                "products": out}, separators=(",", ":"), ensure_ascii=False))
+    print(f"wrote {path} ({len(out)} products)")
 
 
 def write_history(today, items, prices):

@@ -12,6 +12,7 @@ N stores per item per state so the JSON stays small enough for a browser.
 Requires: pip install pandas pyarrow requests
 """
 import json
+import os
 import re
 import sys
 from datetime import date
@@ -23,17 +24,28 @@ import requests
 
 BASE = "https://storage.data.gov.my/pricecatcher"
 OUT = Path(__file__).resolve().parent.parent / "data" / "prices.json"
-KEEP_PER_STATE = 12   # cheapest N stores per item per state
+KEEP_PER_STATE = int(os.environ.get("KEEP_PER_STATE", 12))  # cheapest N stores per item per state
 MAX_AGE_DAYS = 14     # ignore prices older than this (relative to newest date)
 HISTORY_DAYS = 90     # length of the price-history chart
 
-# PriceCatcher premise_type -> our store type
-TYPE_MAP = {
-    "hypermarket": "hypermarket",
-    "pasar raya / supermarket": "supermarket",
-    "kedai serbaneka": "convenience",
-    "kedai runcit": "minimart",
-}
+# PriceCatcher premise_type -> our store type, matched by keyword so small
+# spelling differences ("Pasar Raya/Supermarket", "Kedai Runcit / Pasar Mini")
+# don't silently drop stores. First match wins; anything else (wet markets,
+# farmers' markets, wholesalers...) is excluded and listed in the report.
+TYPE_RULES = [
+    (r"hyper", "hypermarket"),
+    (r"pasar\s*raya|super\s*market", "supermarket"),
+    (r"serbaneka|convenience|kedai\s*24", "convenience"),
+    (r"runcit|pasar\s*mini|mini\s*market|minimart|grocery", "minimart"),
+]
+
+
+def classify_type(premise_type) -> str | None:
+    low = str(premise_type).strip().lower()
+    for pattern, kind in TYPE_RULES:
+        if re.search(pattern, low):
+            return kind
+    return None
 
 # Recognisable chain names in premise names (first match wins)
 CHAINS = [
@@ -72,7 +84,7 @@ def load_months(premise_codes) -> pd.DataFrame:
     """Current month plus enough previous months to cover HISTORY_DAYS."""
     first = date.today().replace(day=1)
     months = [first]
-    for _ in range(HISTORY_DAYS // 30 + 1):
+    for _ in range(HISTORY_DAYS // 30):  # e.g. Sep + Aug, Jul, Jun covers 90 days
         months.append((months[-1] - pd.Timedelta(days=1)).replace(day=1))
     frames = []
     for m in months:
@@ -94,7 +106,8 @@ def main():
     items = read_parquet(f"{BASE}/lookup_item.parquet")
     premises = read_parquet(f"{BASE}/lookup_premise.parquet")
 
-    premises["type"] = premises["premise_type"].str.strip().str.lower().map(TYPE_MAP)
+    premises["type"] = premises["premise_type"].map(classify_type)
+    all_premises = premises
     premises = premises.dropna(subset=["type", "premise_code"])
 
     allp = load_months(set(premises["premise_code"]))
@@ -106,6 +119,7 @@ def main():
     # latest price per (item, premise)
     prices = (prices.sort_values("date")
                     .drop_duplicates(["item_code", "premise_code"], keep="last"))
+    write_coverage(all_premises, premises, prices, newest)
 
     prices = prices.merge(premises[["premise_code", "state"]], on="premise_code")
     prices = (prices.sort_values("price")
@@ -149,6 +163,53 @@ def main():
           f"{len(out['prices'])} prices, as of {out['asOf']}")
 
     write_history(allp, newest, set(used_items["item_code"]))
+
+
+def write_coverage(all_premises, premises, prices, newest):
+    """Which store types / chains / states actually have recent prices.
+
+    Written to data/coverage.json and, inside GitHub Actions, to the run's
+    summary page so you can see coverage without digging through logs.
+    """
+    types = (all_premises.assign(included=all_premises["type"].notna())
+             .groupby(["premise_type", "included"]).size().reset_index(name="premises"))
+    active = premises[premises["premise_code"].isin(prices["premise_code"])].copy()
+    active["chain"] = active["premise"].astype(str).map(chain_of)
+    per_chain = (active.groupby("chain")
+                 .agg(stores=("premise_code", "nunique"), states=("state", "nunique"),
+                      types=("type", lambda t: ", ".join(sorted(set(t)))))
+                 .sort_values("stores", ascending=False).reset_index())
+    per_state = active.groupby("state")["premise_code"].nunique().sort_values(ascending=False)
+    items_per_store = prices.groupby("premise_code")["item_code"].nunique()
+
+    report = {
+        "asOf": newest.date().isoformat(),
+        "stores_with_recent_prices": int(active["premise_code"].nunique()),
+        "items_with_recent_prices": int(prices["item_code"].nunique()),
+        "median_items_per_store": float(items_per_store.median()) if len(items_per_store) else 0,
+        "keep_per_state": KEEP_PER_STATE,
+        "premise_types": types.to_dict("records"),
+        "chains": per_chain.to_dict("records"),
+        "states": {k: int(v) for k, v in per_state.items()},
+    }
+    (OUT.parent / "coverage.json").write_text(json.dumps(report, indent=1, ensure_ascii=False))
+
+    md = [f"## PriceCatcher coverage ({report['asOf']})", "",
+          f"- Stores with prices in the last {MAX_AGE_DAYS} days: **{report['stores_with_recent_prices']}**",
+          f"- Products: **{report['items_with_recent_prices']}** (median {report['median_items_per_store']:.0f} per store)",
+          f"- Site keeps the cheapest **{KEEP_PER_STATE}** stores per product per state", "",
+          "### Store types in PriceCatcher", "", "| premise_type | premises | shown on site |", "|---|---:|---|"]
+    md += [f"| {r['premise_type']} | {r['premises']} | {'✅' if r['included'] else '—'} |" for r in report["premise_types"]]
+    md += ["", "### Chains", "", "| chain | stores | states | types |", "|---|---:|---:|---|"]
+    md += [f"| {r['chain']} | {r['stores']} | {r['states']} | {r['types']} |" for r in report["chains"]]
+    md += ["", "### States", "", "| state | stores |", "|---|---:|"]
+    md += [f"| {k} | {v} |" for k, v in report["states"].items()]
+    text = "\n".join(md)
+    print(text)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a") as f:
+            f.write(text + "\n")
 
 
 def write_history(allp, newest, item_codes):

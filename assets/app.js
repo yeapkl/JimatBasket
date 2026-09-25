@@ -31,13 +31,15 @@
     "Pulau Pinang", "Sabah", "Sarawak", "Selangor", "Terengganu", "W.P. Kuala Lumpur", "W.P. Labuan", "W.P. Putrajaya"];
 
   const ui = {
-    q: "", state: "", type: "", category: "", aid: false, sort: "savings",
+    q: "", state: "", type: "", category: "", aid: false, sort: "savings", limit: 60,
     lang: "en",
     basket: store.get("jb.basket", {}),
   };
   let DB = null;
   let HISTORY = null; // loaded lazily
   let PROMOS = [], AID = [];
+  let ONLINE_AS_OF = null, ONLINE_SAMPLE = false;
+  const PAGE = 60; // cards per "page" of results
   let chartScale = null; // set by historyHTML, used by bindChart
 
   // ---------- i18n ----------
@@ -74,8 +76,9 @@
   }
 
   async function load() {
-    const [raw, promos, community, aid] = await Promise.all([
+    const [raw, online, promos, community, aid] = await Promise.all([
       getJSON("data/prices.json"),
+      getJSON("data/online.json", true),
       getJSON("data/promos.json", true),
       getJSON("data/community.json", true),
       getJSON("data/aid.json", true),
@@ -95,6 +98,24 @@
         state: r.state, district: r.district || "", community: true, verified: !!r.verified };
       push(r.itemId, { store: s, price: r.price, date: r.date });
     });
+    // Prices from retailers' own websites (scripts/fetch_online_prices.py).
+    // They're separate products (online catalogues are far bigger than the
+    // PriceCatcher list) and apply in every state.
+    const webStores = new Map();
+    for (const p of (online && online.products) || []) {
+      if (!itemById.has(p.id)) {
+        itemById.set(p.id, { id: p.id, name: p.name, unit: p.unit, category: p.category, online: true,
+          search: p.name.toLowerCase() + " " + p.category.toLowerCase() });
+      }
+      for (const [retailer, price, url, inStock, date] of p.offers) {
+        if (!webStores.has(retailer)) {
+          webStores.set(retailer, { id: "web:" + retailer, name: retailer, chain: retailer, type: "online", state: "", district: "", online: true });
+        }
+        push(p.id, { store: webStores.get(retailer), price, date, url, inStock: !!inStock });
+      }
+    }
+    ONLINE_AS_OF = online && online.products && online.products.length ? online.asOf : null;
+    ONLINE_SAMPLE = !!(online && online.source === "sample");
     for (const list of byItem.values()) list.sort((a, b) => a.price - b.price);
 
     AID = (aid && aid.programmes) || [];
@@ -114,7 +135,7 @@
 
   function offersFor(itemId) {
     const all = DB.byItem.get(itemId) || [];
-    return all.filter((o) => (!ui.state || o.store.state === ui.state) && (!ui.type || o.store.type === ui.type));
+    return all.filter((o) => (!ui.state || o.store.online || o.store.state === ui.state) && (!ui.type || o.store.type === ui.type));
   }
   function promosInScope() {
     return PROMOS.filter((p) => !ui.state || !p.states.length || p.states.includes(ui.state));
@@ -138,13 +159,14 @@
     sel.innerHTML = `<option value="">${esc(t("state.all"))}</option>` + states.map((s) => `<option>${esc(s)}</option>`).join("");
     sel.value = ui.state;
 
-    const cats = [...new Set(DB.items.map((i) => i.category))].sort();
+    const cats = [...new Set([...DB.itemById.values()].map((i) => i.category))].sort();
     $("#categories").innerHTML =
       `<button class="chip ${ui.category ? "" : "active"}" data-cat="">${esc(t("cat.all"))}</button>` +
       (AID.length ? `<button class="chip chip-aid ${ui.aid ? "active" : ""}" data-aid aria-pressed="${ui.aid}">🏷️ ${esc(t("filter.aid"))}</button>` : "") +
       cats.map((c) => `<button class="chip ${ui.category === c ? "active" : ""}" data-cat="${esc(c)}">${esc(catLabel(c))}</button>`).join("");
 
-    $("#dataSource").innerHTML = DB.source === "pricecatcher" ? t("footer.source", { d: fmtDate(DB.asOf) }) : esc(t("footer.demo", { d: fmtDate(DB.asOf) }));
+    $("#dataSource").innerHTML = (DB.source === "pricecatcher" ? t("footer.source", { d: fmtDate(DB.asOf) }) : esc(t("footer.demo", { d: fmtDate(DB.asOf) })))
+      + (ONLINE_AS_OF ? " " + esc(t(ONLINE_SAMPLE ? "footer.onlineDemo" : "footer.online", { d: fmtDate(ONLINE_AS_OF) })) : "");
     $("#sampleBanner").hidden = DB.source !== "sample";
   }
 
@@ -184,14 +206,20 @@
 
     const html = [];
     if (rows.length) html.push(featuredHTML());
-    rows.forEach((r, i) => {
+    rows.slice(0, ui.limit).forEach((r, i) => {
       html.push(cardHTML(r));
       if (i === 7) html.push(inlineAdHTML());
     });
     $("#results").innerHTML = html.join("");
+    $("#moreResults").hidden = rows.length <= ui.limit;
+    $("#moreResults").textContent = t("results.more", { n: (rows.length - ui.limit).toLocaleString() });
     $("#empty").hidden = rows.length > 0;
     renderDeals();
     pushAds();
+  }
+
+  function whereOf(o) {
+    return o.store.online ? t("online.where") : [o.store.district, o.store.state].filter(Boolean).join(", ");
   }
 
   function aidTags(item) {
@@ -219,7 +247,7 @@
           <div class="best-label">${esc(t("card.cheapest"))}</div>
           <div class="best-price"><small>RM</small>${best.price.toFixed(2)}</div>
           <div class="best-store">${esc(best.store.name)}${best.store.community ? ` <span class="tag tag-community">${esc(t("detail.community"))}</span>` : ""}</div>
-          <div class="best-where">${esc([best.store.district, best.store.state].filter(Boolean).join(", "))}</div>
+          <div class="best-where">${esc(whereOf(best))}</div>
         </div>
         <div class="card-foot">
           <span>${esc(t("card.stores", { n: offers.length, max: rm(max) }))}</span>
@@ -416,9 +444,10 @@
       <li class="${i === 0 ? "top" : ""}">
         <span class="rank-no">${i + 1}</span>
         <div>
-          <div class="rank-store">${esc(o.store.name)}<span class="tag">${esc(typeLabel(o.store.type))}</span>${o.store.community
+          <div class="rank-store">${o.url ? `<a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.store.name)} ↗</a>` : esc(o.store.name)}<span class="tag ${o.store.online ? "tag-online" : ""}">${esc(typeLabel(o.store.type))}</span>${o.inStock === false
+            ? `<span class="tag tag-oos">${esc(t("detail.outOfStock"))}</span>` : ""}${o.store.community
             ? `<span class="tag tag-community">${esc(t("detail.community"))}${o.store.verified ? " ✓" : ""}</span>` : ""}</div>
-          <div class="rank-where">${esc([o.store.district, o.store.state].filter(Boolean).join(", "))} · ${esc(fmtDate(o.date))}</div>
+          <div class="rank-where">${esc(whereOf(o))} · ${esc(fmtDate(o.date))}</div>
         </div>
         <div class="rank-price">${rm(o.price)}
           <span class="rank-diff">${i === 0 ? esc(t("card.cheapest")) : "+" + rm(o.price - min)}</span></div>
@@ -553,7 +582,7 @@
 
   // ---------- Report a price ----------
   function openReport(itemId) {
-    const items = [...DB.itemById.values()].sort((a, b) => a.name.localeCompare(b.name));
+    const items = [...DB.itemById.values()].filter((i) => !i.online).sort((a, b) => a.name.localeCompare(b.name));
     $("#rItem").innerHTML = items.map((i) => `<option value="${i.id}">${esc(i.name)} (${esc(i.unit)})</option>`).join("") +
       `<option value="other">${esc(t("submit.itemOther"))}</option>`;
     if (itemId) $("#rItem").value = String(itemId);
@@ -659,18 +688,18 @@
     let timer;
     $("#q").addEventListener("input", (e) => {
       clearTimeout(timer);
-      timer = setTimeout(() => { ui.q = e.target.value; writeURL(); renderResults(); }, 120);
+      timer = setTimeout(() => { ui.q = e.target.value; writeURL(); refresh(); }, 120);
     });
     $("#searchForm").addEventListener("submit", (e) => { e.preventDefault(); $("#q").blur(); });
-    $("#state").addEventListener("change", (e) => { ui.state = e.target.value; store.set("jb.state", ui.state); writeURL(); renderResults(); });
-    $("#sort").addEventListener("change", (e) => { ui.sort = e.target.value; renderResults(); });
+    $("#state").addEventListener("change", (e) => { ui.state = e.target.value; store.set("jb.state", ui.state); writeURL(); refresh(); });
+    $("#sort").addEventListener("change", (e) => { ui.sort = e.target.value; refresh(); });
     $("#lang").addEventListener("change", (e) => setLang(e.target.value));
 
     $("#storeTypes").addEventListener("click", (e) => {
       const b = e.target.closest(".chip"); if (!b) return;
       ui.type = b.dataset.type;
       $$("#storeTypes .chip").forEach((c) => c.classList.toggle("active", c === b));
-      writeURL(); renderResults();
+      writeURL(); refresh();
     });
     $("#categories").addEventListener("click", (e) => {
       const b = e.target.closest(".chip"); if (!b) return;
@@ -681,13 +710,14 @@
         ui.category = b.dataset.cat;
         $$("#categories .chip[data-cat]").forEach((c) => c.classList.toggle("active", c === b));
       }
-      renderResults();
+      refresh();
     });
     $("#rItem").addEventListener("change", (e) => {
       $("#rOtherWrap").hidden = e.target.value !== "other";
       $("#rOther").required = e.target.value === "other";
     });
     $("#reportForm").addEventListener("submit", sendReport);
+    $("#moreResults").addEventListener("click", () => { ui.limit += PAGE; renderResults(); });
 
     document.addEventListener("click", (e) => {
       const add = e.target.closest("[data-add]");
@@ -728,6 +758,8 @@
       } catch { /* cancelled */ }
     });
   }
+  // filters changed: start again from the first page of results
+  function refresh() { ui.limit = PAGE; renderResults(); }
   // switch between panels without losing the original focus target
   function closePanelsSoft() { $$(".drawer, .modal").forEach((el) => (el.hidden = true)); }
 

@@ -2,6 +2,9 @@
 // are not translated. Use {name} placeholders for values.
 window.JIMAT_I18N = {
   en: {
+    "type.online": "Online", "online.where": "Online store · delivery / pick-up", "detail.outOfStock": "Out of stock",
+    "results.more": "Show more ({n} more)",
+    "footer.online": "Online prices from retailer websites, updated {d}.", "footer.onlineDemo": "Online prices are demo data too.",
     "lang.name": "English",
     "nav.basket": "My Basket", "nav.support": "Support", "nav.theme": "Toggle dark mode",
     "hero.eyebrow": "Malaysia grocery price comparison",
@@ -67,6 +70,9 @@ window.JIMAT_I18N = {
   },
 
   ms: {
+    "type.online": "Dalam talian", "online.where": "Kedai dalam talian · penghantaran / ambil sendiri", "detail.outOfStock": "Kehabisan stok",
+    "results.more": "Tunjuk lagi ({n} lagi)",
+    "footer.online": "Harga dalam talian dari laman web peruncit, dikemas kini {d}.", "footer.onlineDemo": "Harga dalam talian juga data demo.",
     "lang.name": "Bahasa Melayu",
     "nav.basket": "Bakul Saya", "nav.support": "Sokong", "nav.theme": "Tukar mod gelap",
     "hero.eyebrow": "Perbandingan harga barangan runcit Malaysia",
@@ -132,6 +138,9 @@ window.JIMAT_I18N = {
   },
 
   zh: {
+    "type.online": "网店", "online.where": "网店 · 送货 / 自取", "detail.outOfStock": "缺货",
+    "results.more": "显示更多（还有 {n} 个）",
+    "footer.online": "网店价格来自零售商网站，更新于 {d}。", "footer.onlineDemo": "网店价格也是演示数据。",
     "lang.name": "中文",
     "nav.basket": "我的购物篮", "nav.support": "支持", "nav.theme": "切换深色模式",
     "hero.eyebrow": "马来西亚杂货价格比较",

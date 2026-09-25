@@ -3,9 +3,9 @@ name: Deploy to GCP (Cloud Run)
 on:
   push:
     branches: [main]
-  # re-deploy after the daily price update commits new data
+  # re-deploy after the daily price updates commit new data
   workflow_run:
-    workflows: ["Update prices"]
+    workflows: ["Update prices", "Update online prices"]
     types: [completed]
     branches: [main]
   workflow_dispatch:

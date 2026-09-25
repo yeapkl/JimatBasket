@@ -14,6 +14,7 @@ A clean, mobile-first static website with no build step and no backend. It runs 
   - the **best one-stop shop** (the single store with the lowest total)
 - 📣 **Ad slots**: a top banner plus an inline card in the results. House ads show by default, and Google AdSense is ready to switch on
 - ❤️ **Contribute button**: a support modal with Ko-fi, GitHub Sponsors and an optional DuitNow/TNG QR code
+- 🛒 **Online shop prices**: thousands more products collected from retailer websites (Lotus's, AEON, Jaya Grocer...), grouped by barcode and ranked cheapest first, with links to buy
 - 📈 **Price history**: a 90-day chart of the lowest and typical (median) price, with a "good time to buy?" verdict and a table view
 - 🔥 **This week's deals**: weekly promotions from store catalogues, with "Promo" badges on products
 - 📸 **Report a price**: shoppers can submit prices with a photo of the shelf tag or receipt. Once you approve a report, it appears as a "Community" price
@@ -46,15 +47,75 @@ The GitHub Action `.github/workflows/update-prices.yml` runs the fetcher **every
 
 > Note: the fetcher could not be tested where it was written, because network access to data.gov.my was blocked. Run the Action once and check its log. If the column names in the PriceCatcher files have changed, adjust them in `scripts/fetch_pricecatcher.py`.
 
+### Coverage report
+
+Every PriceCatcher run writes `data/coverage.json` and a table on the Action's summary page. The table shows:
+
+- every PriceCatcher store type, and whether the site shows it;
+- how many stores each chain has (Lotus's, 99 Speedmart, KK Mart...) and in how many states;
+- stores per state.
+
+Use it to see which chains PriceCatcher actually surveys. Store types are matched by keyword, so small spelling changes in PriceCatcher don't drop stores. Wet markets and farmers' markets are left out on purpose. `KEEP_PER_STATE` (default 12) sets how many of the cheapest stores per product per state are kept.
+
+## Online prices from retailer websites
+
+PriceCatcher covers a fixed list of everyday items. For the full range on the shelf, `scripts/fetch_online_prices.py` collects prices from retailers' own online shops. It needs no site-specific code for most shops:
+
+1. **Respects `robots.txt`.** Pages a site disallows are never fetched, and its `Crawl-delay` is honoured.
+2. **Finds product pages through the site's sitemaps.**
+3. **Reads the standard product data** that most shops publish for Google Shopping (schema.org JSON-LD, or product price meta tags): name, price, barcode, brand and stock status.
+4. **Keeps only grocery categories.** Electronics, clothes and the like are skipped.
+5. **Groups the same product across shops**, by barcode or otherwise by name and size, and ranks the shops cheapest first. Online prices apply in every state. Shoppers see them under the **Online** filter or alongside store prices.
+
+It's polite by design:
+
+- one request at a time per site, at least 1.5 s apart;
+- a clear User-Agent (`JimatBasketBot`);
+- backs off when a site says it's busy (429/503) and stops after repeated refusals;
+- at most 3,000 pages per shop per run, starting from a different point each day, so large catalogues are covered over several days;
+- prices seen in the last 14 days are kept in between.
+
+**Turning a retailer on:** every entry in `scripts/retailers.json` starts with `"enabled": false`.
+
+1. **Read the retailer's terms of use.** If they forbid automated collection, leave it off, or ask the retailer for a price feed or partnership instead.
+2. Test it without saving anything:
+   ```bash
+   pip install requests
+   python scripts/fetch_online_prices.py --only "Jaya Grocer" --max-pages 30 --dry-run
+   ```
+   You can also use *Actions → Update online prices → Run workflow* with `only` filled in.
+3. Set `"enabled": true`. The **Update online prices** job then runs daily (about 2:43am Malaysia time) and redeploys the site.
+
+**Reading the run report** (on the Action's summary page):
+
+| status | meaning |
+|---|---|
+| `ok` | Working |
+| `no-product-data` | Pages load, but the product data is drawn by JavaScript. This site needs a custom adapter |
+| `robots.txt disallows crawling` | The site asks bots not to crawl, so it's skipped |
+| `blocked` | Repeated 403/429 errors, so the run stopped |
+| `unreachable` | The domain in `retailers.json` is probably wrong |
+| `no product pages found in sitemaps` | Add the shop's sitemap to `sitemaps`, or its product URL pattern to `product_url` |
+
+The retailer domains in `retailers.json` weren't verified when it was written. Shops without an online store with prices (many convenience stores) have nothing to collect. For those, PriceCatcher and shopper reports are the sources.
+
+Settings (environment variables): `ONLINE_MAX_PAGES` (3000), `ONLINE_MIN_DELAY` (1.5 s), `ONLINE_TIME_BUDGET_MIN` (150), `ONLINE_STALE_DAYS` (14).
+
 ## How fresh are the prices?
 
-Prices are **not** fetched live from stores when someone opens the site. Every visit loads the latest copy of `data/prices.json` and `data/history.json`. The GitHub Action rebuilds those files from PriceCatcher **once a day**, so visitors always see the most recent daily data. PriceCatcher itself is a daily survey, so this matches how often the source changes.
+Prices are **not** fetched live from stores when someone opens the site. Every visit loads the latest copies of the data files, which two daily GitHub Actions rebuild:
+
+- **Update prices** (about 9:17am Malaysia time) reads PriceCatcher, a daily survey;
+- **Update online prices** (about 2:43am Malaysia time) reads retailer websites.
+
+Each one redeploys the site when it finishes.
 
 ## Maintaining the data files
 
 | File | Who updates it | How |
 |---|---|---|
-| `data/prices.json`, `data/history.json` | GitHub Action (daily) | `scripts/fetch_pricecatcher.py` |
+| `data/prices.json`, `data/history.json`, `data/coverage.json` | GitHub Action (daily) | `scripts/fetch_pricecatcher.py` |
+| `data/online.json` | GitHub Action (daily) | `scripts/fetch_online_prices.py`, retailers listed in `scripts/retailers.json` |
 | `data/promos.json` | You, weekly | Copy deals from store catalogues. Entries past `validTo` hide automatically. `states: []` means nationwide |
 | `data/community.json` | You, after review | Add approved "Report a price" submissions. Set `verified: true` if you checked the photo |
 | `data/aid.json` | You, when programmes change | Keyword rules for the SARA / Subsidi labels. **Check the official SARA item list and adjust the keywords.** The current rules are indicative |
@@ -77,7 +138,7 @@ Edit `assets/config.js`:
 `.github/workflows/deploy-gcp.yml` builds the site into a small nginx container (`Dockerfile`, `deploy/nginx.conf`) and deploys it to Cloud Run in `asia-southeast1` (Singapore). It runs:
 
 - on every push to `main`,
-- after each daily **Update prices** run, so new prices go live the same day,
+- after each daily **Update prices** / **Update online prices** run, so new prices go live the same day,
 - by hand from the Actions tab.
 
 GitHub logs in to Google with Workload Identity Federation, so **no service-account key** is stored anywhere. Only this repo's `main` branch can deploy.
@@ -152,12 +213,17 @@ assets/config.js               # your ads/donation/affiliate/report settings
 assets/i18n.js                 # EN / BM / 中文 translations
 data/prices.json               # price data (demo or PriceCatcher)
 data/history.json              # 90-day lowest/median per item
+data/coverage.json             # which store types / chains / states PriceCatcher covers
+data/online.json               # prices from retailer websites
 data/promos.json               # weekly deals (hand-curated)
 data/community.json            # approved user price reports
 data/aid.json                  # SARA / Subsidi label rules
 scripts/generate_sample_data.py
 scripts/fetch_pricecatcher.py  # real data from data.gov.my
 .github/workflows/update-prices.yml   # daily PriceCatcher refresh
+.github/workflows/update-online-prices.yml  # daily retailer-website refresh
+scripts/fetch_online_prices.py        # retailer website collector
+scripts/retailers.json                # which retailer sites to collect (all off by default)
 .github/workflows/deploy-gcp.yml      # build + deploy to Cloud Run
 Dockerfile, .dockerignore, deploy/nginx.conf
 deploy/gcp-setup.sh                   # one-time GCP setup (run in Cloud Shell)
