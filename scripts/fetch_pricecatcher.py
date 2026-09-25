@@ -25,6 +25,7 @@ BASE = "https://storage.data.gov.my/pricecatcher"
 OUT = Path(__file__).resolve().parent.parent / "data" / "prices.json"
 KEEP_PER_STATE = 12   # cheapest N stores per item per state
 MAX_AGE_DAYS = 14     # ignore prices older than this (relative to newest date)
+HISTORY_DAYS = 90     # length of the price-history chart
 
 # PriceCatcher premise_type -> our store type
 TYPE_MAP = {
@@ -48,6 +49,11 @@ CHAINS = [
 ]
 
 
+def nice(s: str) -> str:
+    """'LOTUS'S SHAH ALAM' -> "Lotus's Shah Alam" (str.title() gives Lotus'S)."""
+    return " ".join(w.capitalize() for w in str(s).split())
+
+
 def chain_of(name: str) -> str:
     low = name.lower()
     for pattern, chain in CHAINS:
@@ -62,37 +68,40 @@ def read_parquet(url: str) -> pd.DataFrame:
     return pd.read_parquet(BytesIO(r.content))
 
 
-def load_month() -> pd.DataFrame:
-    today = date.today()
-    months = [today.replace(day=1)]
-    prev = (months[0] - pd.Timedelta(days=1)).replace(day=1)
-    months.append(prev)
+def load_months(premise_codes) -> pd.DataFrame:
+    """Current month plus enough previous months to cover HISTORY_DAYS."""
+    first = date.today().replace(day=1)
+    months = [first]
+    for _ in range(HISTORY_DAYS // 30 + 1):
+        months.append((months[-1] - pd.Timedelta(days=1)).replace(day=1))
     frames = []
     for m in months:
         url = f"{BASE}/pricecatcher_{m:%Y-%m}.parquet"
         try:
-            frames.append(read_parquet(url))
-            print(f"loaded {url}")
+            df = read_parquet(url)
         except requests.HTTPError as e:
             print(f"skip {url}: {e}")
+            continue
+        # keep memory down: only the store types we show
+        frames.append(df[df["premise_code"].isin(premise_codes)][["date", "premise_code", "item_code", "price"]])
+        print(f"loaded {url}")
     if not frames:
         sys.exit("no PriceCatcher data could be downloaded")
     return pd.concat(frames, ignore_index=True)
 
 
 def main():
-    prices = load_month()
     items = read_parquet(f"{BASE}/lookup_item.parquet")
     premises = read_parquet(f"{BASE}/lookup_premise.parquet")
 
     premises["type"] = premises["premise_type"].str.strip().str.lower().map(TYPE_MAP)
     premises = premises.dropna(subset=["type", "premise_code"])
 
-    prices["date"] = pd.to_datetime(prices["date"])
-    newest = prices["date"].max()
-    prices = prices[prices["date"] >= newest - pd.Timedelta(days=MAX_AGE_DAYS)]
-    prices = prices[prices["premise_code"].isin(premises["premise_code"])]
-    prices = prices[prices["price"] > 0]
+    allp = load_months(set(premises["premise_code"]))
+    allp["date"] = pd.to_datetime(allp["date"])
+    allp = allp[allp["price"] > 0]
+    newest = allp["date"].max()
+    prices = allp[allp["date"] >= newest - pd.Timedelta(days=MAX_AGE_DAYS)]
 
     # latest price per (item, premise)
     prices = (prices.sort_values("date")
@@ -112,16 +121,16 @@ def main():
         "items": [
             {
                 "id": int(r.item_code),
-                "name": str(r.item).title(),
+                "name": nice(r.item),
                 "unit": str(r.unit),
-                "category": str(r.item_category).title(),
+                "category": nice(r.item_category),
             }
             for r in used_items.itertuples()
         ],
         "stores": [
             {
                 "id": int(r.premise_code),
-                "name": str(r.premise).title(),
+                "name": nice(r.premise),
                 "chain": chain_of(str(r.premise)),
                 "type": r.type,
                 "state": str(r.state),
@@ -138,6 +147,30 @@ def main():
     OUT.write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {OUT}: {len(out['items'])} items, {len(out['stores'])} stores, "
           f"{len(out['prices'])} prices, as of {out['asOf']}")
+
+    write_history(allp, newest, set(used_items["item_code"]))
+
+
+def write_history(allp, newest, item_codes):
+    """Malaysia-wide daily lowest & median price per item for the chart."""
+    start = newest - pd.Timedelta(days=HISTORY_DAYS - 1)
+    h = allp[(allp["date"] >= start) & allp["item_code"].isin(item_codes)]
+    daily = h.groupby(["item_code", "date"])["price"].agg(["min", "median"])
+    dates = pd.date_range(start, newest, freq="D")
+    out = {}
+    for code, g in daily.groupby(level=0):
+        g = g.droplevel(0).reindex(dates)
+        if g["min"].notna().sum() < 2:
+            continue
+        rnd = lambda col: [None if pd.isna(v) else round(float(v), 2) for v in g[col]]
+        out[int(code)] = {"min": rnd("min"), "med": rnd("median")}
+    path = OUT.parent / "history.json"
+    path.write_text(json.dumps({
+        "source": "pricecatcher",
+        "dates": [d.date().isoformat() for d in dates],
+        "items": out,
+    }, separators=(",", ":")))
+    print(f"wrote {path}: {len(out)} items x {len(dates)} days")
 
 
 if __name__ == "__main__":

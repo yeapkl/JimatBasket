@@ -1,0 +1,9 @@
+{
+  "source": "sample",
+  "note": "Approved user price reports. Review submissions, then add them here (verified = you checked the photo).",
+  "reports": [
+    { "itemId": 10, "store": "Pasaraya Maju Jaya", "type": "minimart", "state": "Selangor", "district": "Klang", "price": 12.80, "date": "2026-09-24", "verified": true },
+    { "itemId": 1, "store": "Kedai Runcit Pak Mat", "type": "minimart", "state": "Kelantan", "district": "Kota Bharu", "price": 25.50, "date": "2026-09-23", "verified": true },
+    { "itemId": 15, "store": "Pasar Mini Seri Kembangan", "type": "minimart", "state": "Selangor", "district": "Petaling Jaya", "price": 8.90, "date": "2026-09-24", "verified": false }
+  ]
+}

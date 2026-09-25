@@ -160,6 +160,43 @@ def main():
     }
     OUT.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {OUT} ({len(items)} items, {len(stores)} stores, {len(prices)} prices)")
+    write_history(today, items, prices)
+
+
+def write_history(today, items, prices):
+    """90 days of Malaysia-wide lowest & median price per item, ending today."""
+    days = 90
+    dates = [(today - timedelta(days=days - 1 - i)).isoformat() for i in range(days)]
+    by_item = {}
+    for item_id, _, p, _ in prices:
+        by_item.setdefault(item_id, []).append(p)
+    out = {}
+    for item in items:
+        ps = sorted(by_item.get(item["id"], []))
+        if not ps:
+            continue
+        lo_now, med_now = ps[0], ps[len(ps) // 2]
+        # walk backwards from today's values
+        ratio = lo_now / med_now
+        med = [med_now]
+        drift = random.uniform(-0.0015, 0.003)  # most things got a bit pricier
+        for _ in range(days - 1):
+            med.append(med[-1] * (1 - drift + random.gauss(0, 0.004)))
+        med.reverse()
+        # lowest price moves in steps (promos run for days), sometimes dipping
+        lo, cur = [], random.uniform(1.0, 1.06)
+        for i in range(days):
+            if random.random() < 0.15:
+                cur = random.uniform(0.94, 0.99) if random.random() < 0.25 else random.uniform(1.0, 1.08)
+            lo.append(min(med[i] * ratio * cur, med[i]))
+        lo[-1], med[-1] = lo_now, med_now
+        out[item["id"]] = {
+            "min": [round(x, 2) for x in lo],
+            "med": [round(x, 2) for x in med],
+        }
+    path = OUT.parent / "history.json"
+    path.write_text(json.dumps({"source": "sample", "dates": dates, "items": out}, separators=(",", ":")))
+    print(f"wrote {path} ({len(out)} items x {days} days)")
 
 
 if __name__ == "__main__":

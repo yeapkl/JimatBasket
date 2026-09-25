@@ -14,7 +14,13 @@ A clean, mobile-first static website with no build step and no backend. It runs 
   - the **best one-stop shop** (the single store with the lowest total)
 - 📣 **Ad slots**: a top banner plus an inline card in the results. House ads show by default, and Google AdSense is ready to switch on
 - ❤️ **Contribute button**: a support modal with Ko-fi, GitHub Sponsors and an optional DuitNow/TNG QR code
-- 🌙 Dark mode, shareable filter URLs (`?q=beras&state=Selangor`), keyboard shortcut `/` to search
+- 📈 **Price history**: a 90-day chart of the lowest and typical (median) price, with a "good time to buy?" verdict and a table view
+- 🔥 **This week's deals**: weekly promotions from store catalogues, with "Promo" badges on products
+- 📸 **Report a price**: shoppers can submit prices with a photo of the shelf tag or receipt. Once you approve a report, it appears as a "Community" price
+- 🌐 **English / Bahasa Melayu / 中文** language switch (search also understands 鸡蛋, 米, and so on)
+- 🛍️ **Buy online** buttons (affiliate links) and a sponsored **Featured deal** card
+- 🏷️ **SARA / Subsidi labels** and an "Aid-eligible" filter
+- 🌙 Dark mode, shareable filter URLs (`?q=beras&state=Selangor&lang=ms`), keyboard shortcut `/` to search
 
 ## Run locally
 
@@ -40,7 +46,20 @@ The GitHub Action `.github/workflows/update-prices.yml` runs the fetcher **every
 
 > Note: the fetcher could not be tested where it was written, because network access to data.gov.my was blocked. Run the Action once and check its log. If the column names in the PriceCatcher files have changed, adjust them in `scripts/fetch_pricecatcher.py`.
 
-## Configure ads & donations
+## How fresh are the prices?
+
+Prices are **not** fetched live from stores when someone opens the site. Every visit loads the latest copy of `data/prices.json` and `data/history.json`. The GitHub Action rebuilds those files from PriceCatcher **once a day**, so visitors always see the most recent daily data. PriceCatcher itself is a daily survey, so this matches how often the source changes.
+
+## Maintaining the data files
+
+| File | Who updates it | How |
+|---|---|---|
+| `data/prices.json`, `data/history.json` | GitHub Action (daily) | `scripts/fetch_pricecatcher.py` |
+| `data/promos.json` | You, weekly | Copy deals from store catalogues. Entries past `validTo` hide automatically. `states: []` means nationwide |
+| `data/community.json` | You, after review | Add approved "Report a price" submissions. Set `verified: true` if you checked the photo |
+| `data/aid.json` | You, when programmes change | Keyword rules for the SARA / Subsidi labels. **Check the official SARA item list and adjust the keywords.** The current rules are indicative |
+
+## Configure ads, donations, affiliates & reports
 
 Edit `assets/config.js`:
 
@@ -48,6 +67,10 @@ Edit `assets/config.js`:
 - `support.duitNowQr`: the path to a QR image, e.g. `assets/duitnow.png`
 - `ads.adsense.client` / `slots`: your AdSense IDs. Leave them empty to show house ads
 - `ads.house`: your own "Advertise here" / partner cards
+- `featured`: the sponsored "Featured deal" card at the top of the results (sell this slot)
+- `shopOnline`: "Buy online" buttons. Replace the URLs with your affiliate links (`{q}` becomes the product name)
+- `submit.endpoint`: where "Report a price" sends submissions. Use a free [Formspree](https://formspree.io) form or a Google Apps Script web app, both of which accept photos. While it's empty, the form opens the visitor's email app addressed to `submit.email`
+- `defaultLang`: `en`, `ms` or `zh`. Translations live in `assets/i18n.js`
 
 ## Deploy to GitHub Pages
 
@@ -69,24 +92,27 @@ Edit `assets/config.js`:
 
 ## Suggestions / roadmap
 
+Done ✅: price history charts, weekly promos, crowdsourced prices, BM/中文, affiliate links + featured deals, SARA/Subsidi tags.
+
+Still open:
 1. **"Near me"**: use the browser's location to sort by *price + distance*. PriceCatcher includes premise addresses, which can be geocoded once.
-2. **Price history charts**: show "is this a good price right now?" with a 90-day trend.
-3. **Price-drop alerts**: let people "watch" an item and get an email or Telegram message when it drops. This builds a returning audience.
-4. **Weekly promo catalogues**: collect the weekly flyers from Lotus's, AEON, Mydin, Giant and others, entered by hand or by the community.
-5. **Crowdsourced prices**: let users submit a shelf photo or receipt for items PriceCatcher misses, with a simple upvote/verify system.
-6. **Bahasa Melayu / 中文 toggle**: the audience is multilingual.
-7. **Monetise beyond ads**: affiliate links to online grocers (Lotus's online, AEON myAEON2go, GrabMart, Pandamart), sponsored "featured deal" slots, and B2B price reports for SMEs.
-8. **PWA / "Add to home screen"**: works offline in the store with the shopping list.
-9. **Rahmah / SARA tags**: highlight items covered by government aid programmes such as Menu Rahmah and Sumbangan Asas Rahmah (SARA).
+2. **Price-drop alerts**: let people "watch" an item and get an email or Telegram message when it drops. This builds a returning audience (needs a small backend).
+3. **PWA / "Add to home screen"**: works offline in the store with the shopping list.
+4. **B2B price reports** for SMEs and kedai runcit owners.
 
 ## Project structure
 
 ```
 index.html                     # page
 assets/styles.css              # design (light + dark)
-assets/app.js                  # search, ranking, basket, ads, support modal
-assets/config.js               # your ads/donation settings
+assets/app.js                  # search, ranking, basket, chart, deals, reports, ads
+assets/config.js               # your ads/donation/affiliate/report settings
+assets/i18n.js                 # EN / BM / 中文 translations
 data/prices.json               # price data (demo or PriceCatcher)
+data/history.json              # 90-day lowest/median per item
+data/promos.json               # weekly deals (hand-curated)
+data/community.json            # approved user price reports
+data/aid.json                  # SARA / Subsidi label rules
 scripts/generate_sample_data.py
 scripts/fetch_pricecatcher.py  # real data from data.gov.my
 .github/workflows/update-prices.yml

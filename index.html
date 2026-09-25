@@ -15,16 +15,21 @@
 <body>
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <a class="brand" href="#" aria-label="JimatBasket home">
+      <a class="brand" href="./" aria-label="JimatBasket home">
         <span class="brand-mark">🧺</span>
         <span>Jimat<b>Basket</b></span>
       </a>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
-        <button class="btn btn-ghost basket-btn" id="openBasket" aria-label="Open my basket">
-          🛒 <span class="hide-sm">My Basket</span> <span class="pill" id="basketCount">0</span>
+        <select id="lang" class="lang-select" aria-label="Language">
+          <option value="en">EN</option>
+          <option value="ms">BM</option>
+          <option value="zh">中文</option>
+        </select>
+        <button class="btn btn-ghost" id="themeToggle" data-i18n-aria="nav.theme" aria-label="Toggle dark mode">🌙</button>
+        <button class="btn btn-ghost basket-btn" id="openBasket" data-i18n-aria="nav.basket" aria-label="My Basket">
+          🛒 <span class="hide-sm" data-i18n="nav.basket">My Basket</span> <span class="pill" id="basketCount">0</span>
         </button>
-        <button class="btn btn-support" data-open-support>❤️ <span class="hide-sm">Support</span></button>
+        <button class="btn btn-support" data-open-support>❤️ <span class="hide-sm" data-i18n="nav.support">Support</span></button>
       </div>
     </div>
   </header>
@@ -32,49 +37,54 @@
   <main>
     <section class="hero">
       <div class="wrap">
-        <p class="eyebrow">Malaysia grocery price comparison</p>
-        <h1>Find the cheapest groceries <span class="accent">near you</span>.</h1>
-        <p class="lede">Compare prices across supermarkets, hypermarkets &amp; convenience stores — cheapest always on top.</p>
+        <p class="eyebrow" data-i18n="hero.eyebrow">Malaysia grocery price comparison</p>
+        <h1 data-i18n-html="hero.title">Find the cheapest groceries <span class="accent">near you</span>.</h1>
+        <p class="lede" data-i18n="hero.lede">Compare prices across supermarkets, hypermarkets &amp; convenience stores — cheapest always on top.</p>
 
         <form class="search" id="searchForm" role="search" autocomplete="off">
           <span class="search-icon" aria-hidden="true">🔍</span>
-          <input id="q" type="search" placeholder="Search e.g. beras, telur, minyak masak…" aria-label="Search groceries" />
+          <input id="q" type="search" data-i18n-ph="search.placeholder" placeholder="Search e.g. beras, telur, minyak masak…" aria-label="Search" />
           <select id="state" aria-label="State">
-            <option value="">All states</option>
+            <option value="" data-i18n="state.all">All states</option>
           </select>
         </form>
 
         <div class="filters">
           <div class="chips" id="storeTypes" role="group" aria-label="Store type">
-            <button class="chip active" data-type="">All stores</button>
-            <button class="chip" data-type="hypermarket">Hypermarket</button>
-            <button class="chip" data-type="supermarket">Supermarket</button>
-            <button class="chip" data-type="minimart">Mini market</button>
-            <button class="chip" data-type="convenience">Convenience</button>
+            <button class="chip active" data-type="" data-i18n="type.all">All stores</button>
+            <button class="chip" data-type="hypermarket" data-i18n="type.hypermarket">Hypermarket</button>
+            <button class="chip" data-type="supermarket" data-i18n="type.supermarket">Supermarket</button>
+            <button class="chip" data-type="minimart" data-i18n="type.minimart">Mini market</button>
+            <button class="chip" data-type="convenience" data-i18n="type.convenience">Convenience</button>
           </div>
+          <button class="btn btn-outline report-btn" data-open-report data-i18n="report.button">📸 Report a price</button>
         </div>
       </div>
     </section>
 
     <div class="wrap">
-      <div id="sampleBanner" class="notice" hidden>
-        <b>Demo data.</b> Prices shown are sample values for preview. Connect the free
-        <a href="https://data.gov.my/data-catalogue/pricecatcher" target="_blank" rel="noopener">KPDN PriceCatcher</a>
-        feed to show real daily prices.
-      </div>
+      <div id="sampleBanner" class="notice" data-i18n-html="notice.demo" hidden></div>
 
       <aside class="ad ad-banner" id="adTop" aria-label="Sponsored"></aside>
 
       <section class="stats" id="stats"></section>
 
+      <section class="deals" id="deals" hidden>
+        <div class="section-head">
+          <h2 data-i18n="deals.title">This week's deals</h2>
+          <span class="muted" data-i18n="deals.sub">From store catalogues</span>
+        </div>
+        <div class="deals-row" id="dealsRow"></div>
+      </section>
+
       <div class="toolbar">
         <div class="chips chips-scroll" id="categories" role="group" aria-label="Category"></div>
         <label class="sort">
-          <span>Sort</span>
+          <span data-i18n="sort.label">Sort</span>
           <select id="sort">
-            <option value="savings">Biggest savings</option>
-            <option value="price">Lowest price</option>
-            <option value="name">Name A–Z</option>
+            <option value="savings" data-i18n="sort.savings">Biggest savings</option>
+            <option value="price" data-i18n="sort.price">Lowest price</option>
+            <option value="name" data-i18n="sort.name">Name A–Z</option>
           </select>
         </label>
       </div>
@@ -83,17 +93,17 @@
       <section class="grid" id="results" aria-live="polite"></section>
       <div class="empty" id="empty" hidden>
         <div class="empty-emoji">🥲</div>
-        <p>No matches. Try another word or pick “All states”.</p>
+        <p data-i18n="empty.none">No matches.</p>
       </div>
 
       <section class="cta-support">
         <div>
-          <h2>Like JimatBasket?</h2>
-          <p>It's free for everyone. Help keep it that way — share it with family, or chip in for server costs.</p>
+          <h2 data-i18n="cta.title">Like JimatBasket?</h2>
+          <p data-i18n="cta.text">It's free for everyone.</p>
         </div>
         <div class="cta-buttons">
-          <button class="btn btn-primary" data-open-support>❤️ Contribute</button>
-          <button class="btn btn-outline" id="shareBtn">🔗 Share</button>
+          <button class="btn btn-primary" data-open-support data-i18n="cta.contribute">❤️ Contribute</button>
+          <button class="btn btn-outline" id="shareBtn" data-i18n="cta.share">🔗 Share</button>
         </div>
       </section>
     </div>
@@ -105,13 +115,13 @@
         <div class="brand small"><span class="brand-mark">🧺</span> Jimat<b>Basket</b></div>
         <p class="muted" id="dataSource"></p>
       </div>
-      <p class="muted small-print">Prices can change without notice and may differ in store. Always check the shelf price.
-        Not affiliated with any retailer. Store names are trademarks of their owners.</p>
+      <p class="muted small-print" data-i18n="footer.disclaimer"></p>
     </div>
   </footer>
 
-  <!-- Product detail drawer -->
   <div class="overlay" id="overlay" hidden></div>
+
+  <!-- Product detail drawer -->
   <aside class="drawer" id="detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle" hidden>
     <div class="drawer-head">
       <div>
@@ -128,12 +138,60 @@
   <aside class="drawer" id="basket" role="dialog" aria-modal="true" aria-labelledby="basketTitle" hidden>
     <div class="drawer-head">
       <div>
-        <p class="eyebrow">Plan your trip</p>
-        <h2 id="basketTitle">My Basket</h2>
+        <p class="eyebrow" data-i18n="basket.eyebrow">Plan your trip</p>
+        <h2 id="basketTitle" data-i18n="basket.title">My Basket</h2>
       </div>
       <button class="icon-btn" data-close aria-label="Close">✕</button>
     </div>
     <div class="drawer-body" id="basketBody"></div>
+  </aside>
+
+  <!-- Report-a-price drawer -->
+  <aside class="drawer" id="report" role="dialog" aria-modal="true" aria-labelledby="reportTitle" hidden>
+    <div class="drawer-head">
+      <div>
+        <p class="eyebrow" data-i18n="submit.eyebrow">Help the community</p>
+        <h2 id="reportTitle" data-i18n="submit.title">Report a price</h2>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body">
+      <p class="muted" data-i18n="submit.intro"></p>
+      <form id="reportForm" class="form">
+        <label><span data-i18n="submit.item">Product</span>
+          <select name="itemId" id="rItem" required></select></label>
+        <label id="rOtherWrap" hidden><span data-i18n="submit.itemName">Product name &amp; size</span>
+          <input name="itemName" id="rOther" maxlength="120" /></label>
+        <label><span data-i18n="submit.store">Store name</span>
+          <input name="store" required maxlength="120" placeholder="e.g. Lotus's Shah Alam" /></label>
+        <div class="form-row">
+          <label><span data-i18n="submit.state">State</span>
+            <select name="state" id="rState" required></select></label>
+          <label><span data-i18n="submit.area">Area / town</span>
+            <input name="area" maxlength="80" /></label>
+        </div>
+        <label><span data-i18n="submit.type">Store type</span>
+          <select name="type">
+            <option value="hypermarket" data-i18n="type.hypermarket">Hypermarket</option>
+            <option value="supermarket" data-i18n="type.supermarket">Supermarket</option>
+            <option value="minimart" data-i18n="type.minimart">Mini market</option>
+            <option value="convenience" data-i18n="type.convenience">Convenience</option>
+          </select></label>
+        <div class="form-row">
+          <label><span data-i18n="submit.price">Price (RM)</span>
+            <input name="price" type="number" step="0.01" min="0.05" max="9999" inputmode="decimal" required /></label>
+          <label><span data-i18n="submit.date">Date seen</span>
+            <input name="date" id="rDate" type="date" required /></label>
+        </div>
+        <label><span data-i18n="submit.photo">Photo (optional)</span>
+          <input name="photo" type="file" accept="image/*" capture="environment" /></label>
+        <label><span data-i18n="submit.email">Your email (optional)</span>
+          <input name="email" type="email" maxlength="120" /></label>
+        <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button class="btn btn-primary btn-block" type="submit" id="rSend" data-i18n="submit.send">Send report</button>
+        <p class="form-status" id="rStatus" role="status"></p>
+      </form>
+    </div>
   </aside>
 
   <!-- Support modal -->
@@ -141,17 +199,18 @@
     <div class="modal-card">
       <button class="icon-btn modal-close" data-close aria-label="Close">✕</button>
       <div class="modal-emoji">❤️</div>
-      <h2 id="supportTitle">Support JimatBasket</h2>
+      <h2 id="supportTitle" data-i18n="support.title">Support JimatBasket</h2>
       <p class="muted" id="supportMsg"></p>
       <div class="support-links" id="supportLinks"></div>
       <div id="supportQr"></div>
-      <p class="small-print muted">Not in a position to give? Sharing the site helps just as much. Terima kasih!</p>
+      <p class="small-print muted" data-i18n="support.share"></p>
     </div>
   </div>
 
   <div class="toast" id="toast" role="status" hidden></div>
 
   <script src="assets/config.js"></script>
+  <script src="assets/i18n.js"></script>
   <script src="assets/app.js"></script>
 </body>
 </html>

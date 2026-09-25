@@ -1,0 +1,41 @@
+{
+  "source": "sample",
+  "note": "Curated by hand from each store's weekly catalogue. Add a new entry each week; expired entries are hidden automatically.",
+  "promos": [
+    {
+      "chain": "Lotus's", "title": "Weekly Hot Deals", "validFrom": "2026-09-24", "validTo": "2026-09-30",
+      "states": [], "url": "https://www.lotuss.com.my/",
+      "deals": [
+        { "itemId": 1, "price": 22.90, "was": 26.50 },
+        { "itemId": 10, "price": 12.49, "was": 14.90 },
+        { "itemId": 28, "price": 19.90, "was": 23.90 }
+      ]
+    },
+    {
+      "chain": "Mydin", "title": "Jimat Hujung Bulan", "validFrom": "2026-09-22", "validTo": "2026-10-05",
+      "states": [], "url": "https://www.mydin.com.my/",
+      "deals": [
+        { "itemId": 6, "price": 29.90, "was": 34.90 },
+        { "itemId": 35, "price": 15.90, "was": 19.90 },
+        { "itemId": 33, "price": 5.49, "was": 6.90 }
+      ]
+    },
+    {
+      "chain": "AEON", "title": "Weekend Specials", "validFrom": "2026-09-25", "validTo": "2026-09-28",
+      "states": [], "url": "https://www.aeonretail.com.my/",
+      "deals": [
+        { "itemId": 12, "price": 5.99, "was": 7.50 },
+        { "itemId": 16, "price": 27.90, "was": 34.00 },
+        { "itemId": 24, "price": 4.99, "was": 6.90 }
+      ]
+    },
+    {
+      "chain": "Jaya Grocer", "title": "Fresh Picks", "validFrom": "2026-09-23", "validTo": "2026-09-29",
+      "states": ["Selangor", "W.P. Kuala Lumpur", "Johor", "Pulau Pinang"], "url": "https://jayagrocer.com/",
+      "deals": [
+        { "itemId": 22, "price": 4.50, "was": 6.90 },
+        { "itemId": 18, "price": 32.90, "was": 42.00 }
+      ]
+    }
+  ]
+}

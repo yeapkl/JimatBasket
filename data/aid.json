@@ -1,0 +1,27 @@
+{
+  "note": "Indicative only. Match rules are keyword-based; check the official list for each programme and update the keywords when it changes.",
+  "programmes": [
+    {
+      "id": "sara",
+      "label": "SARA",
+      "name": "Sumbangan Asas Rahmah (SARA)",
+      "info": {
+        "en": "May be purchasable with SARA credit at participating stores. Confirm at the counter.",
+        "ms": "Mungkin boleh dibeli dengan kredit SARA di kedai yang menyertai. Sahkan di kaunter.",
+        "zh": "可能可在参与商店使用 SARA 援助金购买，请在柜台确认。"
+      },
+      "keywords": ["beras", "tepung", "gula", "minyak masak", "telur", "roti", "mi segera", "sardin", "tuna", "kicap", "garam", "susu", "biskut", "sabun", "pencuci", "ubat gigi", "syampu", "lampin", "tisu"]
+    },
+    {
+      "id": "subsidi",
+      "label": "Subsidi",
+      "name": "Subsidised / price-controlled item",
+      "info": {
+        "en": "Government-subsidised or price-controlled item. Supply may be limited.",
+        "ms": "Barang bersubsidi atau harga kawalan kerajaan. Bekalan mungkin terhad.",
+        "zh": "政府津贴或管制价格商品，供应可能有限。"
+      },
+      "keywords": ["minyak masak paket", "beras super tempatan"]
+    }
+  ]
+}
