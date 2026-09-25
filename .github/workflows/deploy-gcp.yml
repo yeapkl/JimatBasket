@@ -1,0 +1,81 @@
+name: Deploy to GCP (Cloud Run)
+
+on:
+  push:
+    branches: [main]
+  # re-deploy after the daily price update commits new data
+  workflow_run:
+    workflows: ["Update prices"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # needed for keyless auth (Workload Identity Federation)
+
+concurrency:
+  group: deploy-gcp
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+  AR_REPO: ${{ vars.GCP_AR_REPO }}
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main   # for workflow_run, pick up the fresh price commit
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build & push image
+        id: image
+        run: |
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/${SERVICE}:$(git rev-parse --short HEAD)-${GITHUB_RUN_NUMBER}"
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --project "$PROJECT_ID" \
+            --region "$REGION" \
+            --image "${{ steps.image.outputs.image }}" \
+            --service-account "${{ vars.GCP_RUNTIME_SA }}" \
+            --port 8080 \
+            --cpu 1 --memory 256Mi --cpu-boost \
+            --min-instances 0 --max-instances 5 --concurrency 80 \
+            --quiet
+          URL=$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test
+        run: |
+          URL="${{ steps.deploy.outputs.url }}"
+          for path in / /healthz /data/prices.json; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
+            echo "$path -> $code"
+            if [ "$code" = "403" ]; then
+              echo "::warning::Got 403: the service is not public yet. See the "Public access" step of deploy/gcp-setup.sh."
+              exit 0
+            fi
+            [ "$code" = "200" ] || exit 1
+          done
+          echo "### Deployed: $URL" >> "$GITHUB_STEP_SUMMARY"

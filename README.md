@@ -72,7 +72,49 @@ Edit `assets/config.js`:
 - `submit.endpoint`: where "Report a price" sends submissions. Use a free [Formspree](https://formspree.io) form or a Google Apps Script web app, both of which accept photos. While it's empty, the form opens the visitor's email app addressed to `submit.email`
 - `defaultLang`: `en`, `ms` or `zh`. Translations live in `assets/i18n.js`
 
-## Deploy to GitHub Pages
+## Deploy to Google Cloud (Cloud Run)
+
+`.github/workflows/deploy-gcp.yml` builds the site into a small nginx container (`Dockerfile`, `deploy/nginx.conf`) and deploys it to Cloud Run in `asia-southeast1` (Singapore). It runs:
+
+- on every push to `main`,
+- after each daily **Update prices** run, so new prices go live the same day,
+- by hand from the Actions tab.
+
+GitHub logs in to Google with Workload Identity Federation, so **no service-account key** is stored anywhere. Only this repo's `main` branch can deploy.
+
+### One-time setup (existing GCP project)
+
+JimatBasket shares the GCP project with your other app. Everything the setup creates is named for JimatBasket, and the deployer can only change the `jimatbasket` Cloud Run service, not your other services.
+
+1. In **Cloud Shell**, select the project and run the setup script:
+   ```bash
+   gcloud config set project YOUR_EXISTING_PROJECT
+   bash deploy/gcp-setup.sh
+   ```
+   It creates the Artifact Registry repo, two service accounts, a placeholder Cloud Run service (made public), and the GitHub login trust. If a `github` identity pool already exists in the project, it's reused and a new JimatBasket provider is added to it.
+2. Add the **7 variables** the script prints under *Settings → Secrets and variables → Actions → Variables*: `GCP_PROJECT_ID`, `GCP_REGION`, `CLOUD_RUN_SERVICE`, `GCP_AR_REPO`, `GCP_WIF_PROVIDER`, `GCP_DEPLOY_SA`, `GCP_RUNTIME_SA`. None are secret.
+3. Merge to `main`, or run **Deploy to GCP** from the Actions tab.
+
+### Permissions
+
+**You (running the script once):** Owner on the project, or all of Service Usage Admin, Artifact Registry Admin, Service Account Admin, Project IAM Admin, Workload Identity Pool Admin, and Cloud Run Admin.
+
+**Deployer `gh-deployer@PROJECT.iam.gserviceaccount.com`** (the script grants all of these):
+
+| Role | Granted on | Why |
+|---|---|---|
+| `roles/run.developer` | the `jimatbasket` Cloud Run service only | Deploy new revisions |
+| `roles/artifactregistry.writer` | the `jimatbasket` Artifact Registry repo only | Push images |
+| `roles/iam.serviceAccountUser` | the runtime account only | Run the service as that account |
+| `roles/iam.workloadIdentityUser` | the deployer, granted to this GitHub repo | Keyless login from GitHub Actions |
+
+**Runtime account `jimatbasket-run`:** no roles. The site only serves static files.
+
+**Public access:** `allUsers` gets `roles/run.invoker` on the service. If your organization enforces *Domain restricted sharing* (`iam.allowedPolicyMemberDomains`), an org admin must allow it for this project. The script prints a warning if the grant fails.
+
+**GitHub workflow:** `id-token: write`, `contents: read`. You can require approval before each deploy by adding reviewers to the `production` environment (*Settings → Environments*).
+
+## Deploy to GitHub Pages (alternative)
 
 *Settings → Pages → Deploy from branch →* pick your branch and `/ (root)`. That's it.
 
@@ -115,7 +157,10 @@ data/community.json            # approved user price reports
 data/aid.json                  # SARA / Subsidi label rules
 scripts/generate_sample_data.py
 scripts/fetch_pricecatcher.py  # real data from data.gov.my
-.github/workflows/update-prices.yml
+.github/workflows/update-prices.yml   # daily PriceCatcher refresh
+.github/workflows/deploy-gcp.yml      # build + deploy to Cloud Run
+Dockerfile, .dockerignore, deploy/nginx.conf
+deploy/gcp-setup.sh                   # one-time GCP setup (run in Cloud Shell)
 ```
 
 *Prices can change without notice. JimatBasket isn't affiliated with any retailer.*
