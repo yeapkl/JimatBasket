@@ -536,8 +536,10 @@ def describe(page_html):
                                for m in list(re.finditer(r'price\\?"\s*:', page_html))[:3]]
                               if "self.__next_f" in page_html else [],
         "price_text": text_around_price(page_html),
-        "links": [u for u in dict.fromkeys(LINK_RE.findall(page_html))
-                  if re.search(r"/(c|category|categories|cat|collections?|products?|p|shop|item)/", u, re.I)][:15],
+        "links": ([u for u in dict.fromkeys(LINK_RE.findall(page_html))
+                   if re.search(r"/(c|category|categories|cat|collections?|products?|p|shop|item)/", u, re.I)][:15]
+                  or [u for u in dict.fromkeys(LINK_RE.findall(page_html))
+                      if u.startswith("/") and not re.search(r"\.(css|js|png|jpe?g|svg|ico|webp)$", u)][:15]),
     }
 
 
@@ -580,7 +582,7 @@ def diagnose(site, out_dir, n_pages=5):
             continue
         (out / f"{i:02d}.html").write_text(r.text)
         d = describe(r.text)
-        if i == 0 and not (productish or pages) and not followed:
+        if i == 0 and not productish and not followed:
             # no sitemap: follow a few category/product links from the homepage
             host = urlparse(r.url).netloc
             extra = [urljoin(r.url, u) for u in d["links"]]
