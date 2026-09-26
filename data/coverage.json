@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1364,
+   "stores": 1060,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -89,6 +89,12 @@
    "stores": 70,
    "states": 13,
    "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "Lotus's",
+   "stores": 38,
+   "states": 10,
+   "types": "hypermarket, supermarket"
   },
   {
    "chain": "Mydin",
@@ -115,10 +121,10 @@
    "types": "hypermarket, supermarket"
   },
   {
-   "chain": "Lotus's",
-   "stores": 23,
-   "states": 7,
-   "types": "hypermarket, supermarket"
+   "chain": "Pantai Timur",
+   "stores": 24,
+   "states": 3,
+   "types": "hypermarket, minimart, supermarket"
   },
   {
    "chain": "Servay",
@@ -127,9 +133,33 @@
    "types": "hypermarket, minimart, supermarket"
   },
   {
+   "chain": "Bataras",
+   "stores": 20,
+   "states": 2,
+   "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "Tunas Manja",
+   "stores": 18,
+   "states": 4,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Segi Fresh",
+   "stores": 17,
+   "states": 6,
+   "types": "minimart, supermarket"
+  },
+  {
    "chain": "Billion",
    "stores": 16,
    "states": 5,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Everwin",
+   "stores": 15,
+   "states": 2,
    "types": "minimart, supermarket"
   },
   {
@@ -139,21 +169,69 @@
    "types": "minimart, supermarket"
   },
   {
-   "chain": "Village Grocer",
-   "stores": 11,
-   "states": 2,
-   "types": "supermarket"
-  },
-  {
    "chain": "NSK Trade City",
    "stores": 11,
    "states": 5,
    "types": "supermarket"
   },
   {
+   "chain": "Village Grocer",
+   "stores": 11,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "TMG Mart",
+   "stores": 11,
+   "states": 6,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Maslee",
+   "stores": 11,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "WLS",
+   "stores": 11,
+   "states": 1,
+   "types": "minimart"
+  },
+  {
    "chain": "The Store",
    "stores": 10,
    "states": 5,
+   "types": "supermarket"
+  },
+  {
+   "chain": "CCK Fresh Mart",
+   "stores": 9,
+   "states": 1,
+   "types": "minimart"
+  },
+  {
+   "chain": "Doremart",
+   "stores": 9,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Jaya Grocer",
+   "stores": 8,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Pasaraya LYC",
+   "stores": 8,
+   "states": 1,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Pasaraya BS",
+   "stores": 8,
+   "states": 2,
    "types": "supermarket"
   },
   {
@@ -163,8 +241,20 @@
    "types": "minimart, supermarket"
   },
   {
-   "chain": "Jaya Grocer",
-   "stores": 8,
+   "chain": "Save Mini Market",
+   "stores": 7,
+   "states": 1,
+   "types": "minimart"
+  },
+  {
+   "chain": "Well Mart",
+   "stores": 7,
+   "states": 2,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Family Store",
+   "stores": 7,
    "states": 2,
    "types": "supermarket"
   },
@@ -175,10 +265,82 @@
    "types": "hypermarket, supermarket"
   },
   {
+   "chain": "Milimewa",
+   "stores": 6,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Econjaya",
+   "stores": 6,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "TY Pasaraya",
+   "stores": 6,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "SK Fresh",
+   "stores": 6,
+   "states": 2,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Econo Jaya",
+   "stores": 6,
+   "states": 3,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "BS Freshmart",
+   "stores": 6,
+   "states": 4,
+   "types": "minimart, supermarket"
+  },
+  {
    "chain": "FamilyMart",
    "stores": 5,
    "states": 4,
    "types": "minimart, supermarket"
+  },
+  {
+   "chain": "BS Supermart",
+   "stores": 5,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Big 10",
+   "stores": 5,
+   "states": 3,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Pasaraya PKT",
+   "stores": 5,
+   "states": 2,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Lepapa",
+   "stores": 5,
+   "states": 1,
+   "types": "hypermarket, supermarket"
+  },
+  {
+   "chain": "LS Mart",
+   "stores": 5,
+   "states": 2,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Segi Cash & Carry",
+   "stores": 5,
+   "states": 2,
+   "types": "supermarket"
   },
   {
    "chain": "Mercato",
@@ -187,10 +349,82 @@
    "types": "hypermarket, supermarket"
   },
   {
+   "chain": "Pasaraya Econo",
+   "stores": 5,
+   "states": 4,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Target Supermarket",
+   "stores": 4,
+   "states": 1,
+   "types": "supermarket"
+  },
+  {
+   "chain": "88 Freshmart",
+   "stores": 4,
+   "states": 1,
+   "types": "minimart"
+  },
+  {
+   "chain": "Kim Hock",
+   "stores": 4,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Nirwana Maju",
+   "stores": 4,
+   "states": 1,
+   "types": "supermarket"
+  },
+  {
+   "chain": "City Fresh Mart",
+   "stores": 3,
+   "states": 1,
+   "types": "minimart"
+  },
+  {
+   "chain": "Sing Kwong",
+   "stores": 3,
+   "states": 1,
+   "types": "supermarket"
+  },
+  {
+   "chain": "K-Ceria",
+   "stores": 3,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Instar",
+   "stores": 3,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "MDS Mart",
+   "stores": 3,
+   "states": 1,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Nam Leong",
+   "stores": 3,
+   "states": 1,
+   "types": "minimart, supermarket"
+  },
+  {
    "chain": "KK Mart",
    "stores": 2,
    "states": 2,
    "types": "minimart, supermarket"
+  },
+  {
+   "chain": "New World Mart",
+   "stores": 2,
+   "states": 1,
+   "types": "supermarket"
   },
   {
    "chain": "Sunshine",
