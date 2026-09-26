@@ -18,11 +18,16 @@ concurrency:
   group: deploy-gcp
   cancel-in-progress: false
 
+# Settings come from repository Variables (Settings -> Secrets and variables
+# -> Actions -> Variables). Secrets with the same names also work.
 env:
-  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-  REGION: ${{ vars.GCP_REGION }}
-  SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
-  AR_REPO: ${{ vars.GCP_AR_REPO }}
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION || secrets.GCP_REGION }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE || secrets.CLOUD_RUN_SERVICE }}
+  AR_REPO: ${{ vars.GCP_AR_REPO || secrets.GCP_AR_REPO }}
+  WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER || secrets.GCP_WIF_PROVIDER }}
+  DEPLOY_SA: ${{ vars.GCP_DEPLOY_SA || secrets.GCP_DEPLOY_SA }}
+  RUNTIME_SA: ${{ vars.GCP_RUNTIME_SA || secrets.GCP_RUNTIME_SA }}
 
 jobs:
   deploy:
@@ -34,11 +39,25 @@ jobs:
         with:
           ref: main   # for workflow_run, pick up the fresh price commit
 
+      - name: Check settings
+        run: |
+          missing=""
+          for v in PROJECT_ID:GCP_PROJECT_ID REGION:GCP_REGION SERVICE:CLOUD_RUN_SERVICE AR_REPO:GCP_AR_REPO \
+                   WIF_PROVIDER:GCP_WIF_PROVIDER DEPLOY_SA:GCP_DEPLOY_SA RUNTIME_SA:GCP_RUNTIME_SA; do
+            name=${v%%:*}
+            [ -n "${!name}" ] || missing="$missing ${v#*:}"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing settings:$missing. Add them under Settings -> Secrets and variables -> Actions (Variables tab) in ${GITHUB_REPOSITORY}. Names must match exactly."
+            exit 1
+          fi
+          echo "All 7 settings found. Project: $PROJECT_ID, region: $REGION, service: $SERVICE"
+
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOY_SA }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOY_SA }}
 
       - uses: google-github-actions/setup-gcloud@v2
 
@@ -58,7 +77,7 @@ jobs:
             --project "$PROJECT_ID" \
             --region "$REGION" \
             --image "${{ steps.image.outputs.image }}" \
-            --service-account "${{ vars.GCP_RUNTIME_SA }}" \
+            --service-account "$RUNTIME_SA" \
             --port 8080 \
             --cpu 1 --memory 256Mi --cpu-boost \
             --min-instances 0 --max-instances 5 --concurrency 80 \
