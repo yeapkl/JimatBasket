@@ -88,7 +88,7 @@ jobs:
       - name: Smoke test
         run: |
           URL="${{ steps.deploy.outputs.url }}"
-          for path in / /healthz /data/prices.json; do
+          for path in / /health /data/prices.json; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
             echo "$path -> $code"
             if [ "$code" = "403" ]; then
