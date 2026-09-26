@@ -10,7 +10,8 @@
     {
       "name": "Lotus's",
       "base": "https://www.lotuss.com.my",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: product lists are loaded by JavaScript after the page loads (no prices in the HTML); would need a browser-based adapter."
     },
     {
       "name": "AEON",
@@ -51,8 +52,8 @@
     {
       "name": "Cold Storage (Mercato)",
       "base": "https://mercato.com.my",
-      "enabled": true,
-      "note": "coldstorage.com.my redirects to Mercato."
+      "enabled": false,
+      "note": "Off: mercato.com.my has company pages only (store locator, promotions, recipes), no product pages."
     },
     {
       "name": "99 Speedmart",
@@ -63,7 +64,8 @@
     {
       "name": "KK Mart",
       "base": "https://kkemart.my",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: kkemart.my is a signed-in KK Rewards app; pages contain no product data."
     }
   ]
 }
