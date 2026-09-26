@@ -403,8 +403,12 @@ class Site:
 # ---------------------------------------------------------------------------
 # merge & write
 # ---------------------------------------------------------------------------
-def merge(results, previous, today):
-    """Group offers by product; keep previous offers not re-checked if recent."""
+def merge(results, previous, today, keep_retailers):
+    """Group offers by product; keep previous offers not re-checked if recent.
+
+    Previous offers are only kept for retailers in keep_retailers, so a
+    retailer that gets switched off disappears from the site.
+    """
     products = {}
 
     def add(key, info, offer):
@@ -430,7 +434,7 @@ def merge(results, previous, today):
     cutoff = (date.fromisoformat(today) - timedelta(days=STALE_DAYS)).isoformat()
     for old in (previous or {}).get("products", []):
         for offer in old.get("offers", []):
-            if offer[4] < cutoff:
+            if offer[4] < cutoff or offer[0] not in keep_retailers:
                 continue
             p = products.get(old["key"])
             if p and offer[0] in p["offers"]:
@@ -466,6 +470,7 @@ def main():
     args = ap.parse_args()
 
     retailers = json.loads(CONFIG.read_text())["retailers"]
+    enabled = {r["name"] for r in retailers if r.get("enabled")}
     if args.only:
         retailers = [r for r in retailers if r["name"].lower() == args.only.lower()]
         if not retailers:
@@ -495,7 +500,7 @@ def main():
     previous = json.loads(OUT.read_text()) if OUT.exists() else None
     if previous and previous.get("source") != "online":
         previous = None  # never carry demo/sample offers into real data
-    products = merge(results, previous, today)
+    products = merge(results, previous, today, enabled | set(results))
     compared = sum(1 for p in products if len(p["offers"]) > 1)
 
     report = [s.stats for s in sites]

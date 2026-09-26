@@ -2,20 +2,62 @@
   "_readme": [
     "Retailer websites for scripts/fetch_online_prices.py.",
     "Every retailer starts with enabled=false. Before enabling one, read that site's terms of use; if they forbid automated collection, leave it off (or ask the retailer for a price feed).",
-    "Domains below were NOT verified when this file was written; the first run's report shows which ones work.",
+    "Domains were checked via web search only (the sites couldn't be opened when this was written); the run report shows which ones work.",
     "Optional per retailer: 'sitemaps' (extra sitemap URLs), 'product_url' (regex a product page URL must match), 'delay' (seconds between requests).",
     "Test one retailer without enabling it: python scripts/fetch_online_prices.py --only \"Jaya Grocer\" --max-pages 30 --dry-run"
   ],
   "retailers": [
-    { "name": "Lotus's",        "base": "https://www.lotuss.com.my",       "enabled": false },
-    { "name": "AEON",           "base": "https://myaeon2go.com",           "enabled": false },
-    { "name": "Jaya Grocer",    "base": "https://jayagrocer.com",          "enabled": false },
-    { "name": "Village Grocer", "base": "https://www.villagegrocer.com.my", "enabled": false },
-    { "name": "Mydin",          "base": "https://www.mydin.com.my",        "enabled": false },
-    { "name": "Giant",          "base": "https://www.giant.com.my",        "enabled": false },
-    { "name": "Econsave",       "base": "https://www.econsave.com.my",     "enabled": false },
-    { "name": "Cold Storage",   "base": "https://www.coldstorage.com.my",  "enabled": false },
-    { "name": "99 Speedmart",   "base": "https://www.99speedmart.com.my",  "enabled": false },
-    { "name": "KK Mart",        "base": "https://www.kkmart.com.my",       "enabled": false }
+    {
+      "name": "Lotus's",
+      "base": "https://www.lotuss.com.my",
+      "enabled": true
+    },
+    {
+      "name": "AEON",
+      "base": "https://myaeon2go.com",
+      "enabled": true
+    },
+    {
+      "name": "Jaya Grocer",
+      "base": "https://jayagrocer.com",
+      "enabled": false,
+      "note": "Off: terms of service prohibit spidering, crawling or scraping (section 12)."
+    },
+    {
+      "name": "Village Grocer",
+      "base": "https://www.villagegrocer.com.my",
+      "enabled": true
+    },
+    {
+      "name": "Mydin",
+      "base": "https://mydin.my",
+      "enabled": true
+    },
+    {
+      "name": "Giant",
+      "base": "https://www.giant.com.my",
+      "enabled": true
+    },
+    {
+      "name": "Econsave",
+      "base": "https://www.econsave.com.my",
+      "enabled": true,
+      "note": "Terms license content 'only for the purposes of viewing'; enabled by owner's decision."
+    },
+    {
+      "name": "Cold Storage",
+      "base": "https://www.coldstorage.com.my",
+      "enabled": true
+    },
+    {
+      "name": "99 Speedmart",
+      "base": "https://www.99speedmart.com.my",
+      "enabled": true
+    },
+    {
+      "name": "KK Mart",
+      "base": "https://kkemart.my",
+      "enabled": true
+    }
   ]
 }
