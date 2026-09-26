@@ -72,6 +72,11 @@ CATEGORIES = [
     ("Bakery & Snacks", r"\bbread\b|\broti|bun\b|biscuit|biskut|cracker|kraker|cookie|\bchips\b|kerepek|snack|wafer|chocolate|coklat|instant noodle|mi segera|\bmee\b|\bmaggi\b|noodle|\bcake\b|kek"),
 ]
 CATEGORIES = [(c, re.compile(p, re.I)) for c, p in CATEGORIES]
+# Not groceries for people: pet food/treats, containers, toys...
+EXCLUDE = re.compile(r"\bpuppy|\bkitten|\bdogs?\b|\bcats?\b|\bpets?\b|makanan kucing|makanan anjing|jerhigh|whiskas|"
+                     r"pedigree|friskies|supercoat|smartheart|royal canin|\bme-o\b|\bcontainer\b|\btoy\b", re.I)
+# Checked before CATEGORIES so e.g. "potato chips" is a snack, not a vegetable
+SNACKS = re.compile(r"\bchips\b|crisps|kerepek|\bsnacks?\b", re.I)
 
 SIZE_RE = re.compile(
     r"(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|gm|gram|l|ltr|litre|liter|ml|pcs|pc|biji|s|sheets|rolls?)\b", re.I)
@@ -122,6 +127,10 @@ def product_id(key):
 
 def categorize(*texts):
     text = " ".join(t for t in texts if t)
+    if EXCLUDE.search(text):
+        return None
+    if SNACKS.search(text):
+        return "Bakery & Snacks"
     for cat, rx in CATEGORIES:
         if rx.search(text):
             return cat
@@ -484,6 +493,8 @@ def main():
 
     today = date.today().isoformat()
     previous = json.loads(OUT.read_text()) if OUT.exists() else None
+    if previous and previous.get("source") != "online":
+        previous = None  # never carry demo/sample offers into real data
     products = merge(results, previous, today)
     compared = sum(1 for p in products if len(p["offers"]) > 1)
 

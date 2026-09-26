@@ -61,6 +61,33 @@ CHAINS = [
 ]
 
 
+# PriceCatcher item_category (Malay) -> the site's 10 categories, so filter
+# chips stay consistent with online products and get translated.
+CATEGORY_MAP = {
+    "ayam": "Meat & Seafood", "daging": "Meat & Seafood", "bahan laut": "Meat & Seafood",
+    "ikan darat": "Meat & Seafood", "hasil laut kering": "Meat & Seafood",
+    "bahan-bahan minuman": "Beverages", "tersedia minum": "Beverages",
+    "bawang": "Vegetables & Fruits", "buah-buahan": "Vegetables & Fruits", "sayur-sayuran": "Vegetables & Fruits",
+    "ubi kentang": "Vegetables & Fruits", "cili kering": "Vegetables & Fruits", "kelapa": "Vegetables & Fruits",
+    "beras": "Rice & Grains", "bihun": "Rice & Grains", "tepung": "Rice & Grains",
+    "mee/kuetiau": "Rice & Grains", "kacang": "Rice & Grains",
+    "mi segera": "Bakery & Snacks", "sapuan (spreads)": "Bakery & Snacks",
+    "esen dan ragi": "Cooking Essentials", "gula": "Cooking Essentials", "kicap dan sos": "Cooking Essentials",
+    "minyak dan lemak": "Cooking Essentials", "rempah ratus (berbungkus)": "Cooking Essentials",
+    "rempah ratus (tidak berbungkus)": "Cooking Essentials", "santan (kotak)": "Cooking Essentials",
+    "ikan dalam tin": "Canned Food",
+    "krimer dan susu tepung": "Eggs & Dairy", "mentega": "Eggs & Dairy", "telur": "Eggs & Dairy",
+    "lampin pakai buang": "Baby & Personal Care", "makanan bayi": "Baby & Personal Care",
+    "susu bayi": "Baby & Personal Care", "penjagaan diri": "Baby & Personal Care",
+    "penjagaan rumah": "Household",
+}
+
+
+def category_of(raw) -> str:
+    """Unknown (new) PriceCatcher categories pass through as-is, nicely cased."""
+    return CATEGORY_MAP.get(" ".join(str(raw).lower().split()), nice(raw))
+
+
 def nice(s: str) -> str:
     """'LOTUS'S SHAH ALAM' -> "Lotus's Shah Alam" (str.title() gives Lotus'S)."""
     return " ".join(w.capitalize() for w in str(s).split())
@@ -137,7 +164,7 @@ def main():
                 "id": int(r.item_code),
                 "name": nice(r.item),
                 "unit": str(r.unit),
-                "category": nice(r.item_category),
+                "category": category_of(r.item_category),
             }
             for r in used_items.itertuples()
         ],
