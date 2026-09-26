@@ -27,33 +27,38 @@
     {
       "name": "Village Grocer",
       "base": "https://www.villagegrocer.com.my",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: villagegrocer.com.my is a company/recipes site, no online shop with prices."
     },
     {
       "name": "Mydin",
       "base": "https://mydin.my",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: site shows a Cloudflare bot challenge to automated requests."
     },
     {
       "name": "Giant",
       "base": "https://www.giant.com.my",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: giant.com.my does not respond (connect timeout)."
     },
     {
       "name": "Econsave",
       "base": "https://www.econsave.com.my",
-      "enabled": true,
-      "note": "Terms license content 'only for the purposes of viewing'; enabled by owner's decision."
+      "enabled": false,
+      "note": "Off: econsave.com.my is a company site; prices only inside promotion articles. Terms license content 'only for the purposes of viewing'."
     },
     {
-      "name": "Cold Storage",
-      "base": "https://www.coldstorage.com.my",
-      "enabled": true
+      "name": "Cold Storage (Mercato)",
+      "base": "https://mercato.com.my",
+      "enabled": true,
+      "note": "coldstorage.com.my redirects to Mercato."
     },
     {
       "name": "99 Speedmart",
       "base": "https://www.99speedmart.com.my",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: company website only, no online shop with prices."
     },
     {
       "name": "KK Mart",

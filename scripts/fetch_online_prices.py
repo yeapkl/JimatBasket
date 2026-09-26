@@ -486,6 +486,40 @@ SCRIPT_SRC = re.compile(r"<script[^>]+src=[\"']([^\"']+)", re.I)
 TITLE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
 
 
+NEXT_DATA_RE = re.compile(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', re.S)
+LINK_RE = re.compile(r'href=["\']([^"\'#?]+)', re.I)
+
+
+def price_paths(node, path="", out=None):
+    """JSON paths whose key looks like a price, with sample values."""
+    out = [] if out is None else out
+    if len(out) >= 12:
+        return out
+    if isinstance(node, dict):
+        for k, v in node.items():
+            p = f"{path}.{k}"
+            if re.search(r"price|harga", str(k), re.I) and not isinstance(v, (dict, list)):
+                generic = re.sub(r"\.\d+", "[]", p)
+                out.append(f"{generic}={str(v)[:20]}")
+            else:
+                price_paths(v, p, out)
+    elif isinstance(node, list):
+        for i, v in enumerate(node[:3]):
+            price_paths(v, f"{path}.{i}", out)
+    return out
+
+
+def text_around_price(page_html):
+    """Tag-stripped text around the first few RM prices, plus the class of the element holding them."""
+    out = []
+    for m in list(PRICE_TEXT.finditer(page_html))[:3]:
+        before = page_html[max(0, m.start() - 400):m.start()]
+        cls = re.findall(r'class=["\']([^"\']{1,60})', before)
+        text = re.sub(r"<[^>]+>", " ", page_html[max(0, m.start() - 200):m.end() + 40])
+        out.append({"class": cls[-1] if cls else "", "text": " ".join(text.split())[-120:]})
+    return out
+
+
 def describe(page_html):
     found = [name for name, rx in SIGNALS.items() if re.search(rx, page_html, re.I)]
     title = TITLE.search(page_html)
@@ -497,7 +531,26 @@ def describe(page_html):
         "ld_json_blocks": len(LDJSON_RE.findall(page_html)),
         "api_hints": list(dict.fromkeys(API_HINT.findall(page_html)))[:10],
         "scripts": [u for u in SCRIPT_SRC.findall(page_html)][:12],
+        "next_data_price_paths": next_data_prices(page_html),
+        "rsc_price_snippets": [page_html[max(0, m.start() - 80):m.start() + 80].replace("\\", "")
+                               for m in list(re.finditer(r'price\\?"\s*:', page_html))[:3]]
+                              if "self.__next_f" in page_html else [],
+        "price_text": text_around_price(page_html),
+        "links": [u for u in dict.fromkeys(LINK_RE.findall(page_html))
+                  if re.search(r"/(c|category|categories|cat|collections?|products?|p|shop|item)/", u, re.I)][:15],
     }
+
+
+def next_data_prices(page_html):
+    m = NEXT_DATA_RE.search(page_html)
+    if not m:
+        return []
+    try:
+        data = json.loads(m.group(1))
+    except json.JSONDecodeError:
+        return ["(unparseable)"]
+    props = data.get("props", {}).get("pageProps", {})
+    return [f"pageProps keys: {list(props)[:12]}"] + price_paths(props)
 
 
 def diagnose(site, out_dir, n_pages=5):
@@ -516,19 +569,32 @@ def diagnose(site, out_dir, n_pages=5):
     productish = [u for u in pages if re.search(r"/(products?|p|item|sku)/|-p-\d|\.html$|/\d{5,}", u, re.I)]
     lines.append(f"sitemap urls: {len(pages)}, product-looking: {len(productish)}; samples: {(productish or pages)[:3]}")
     picks = [site.base + "/"] + [u for u in (productish or pages) if site.allowed(u)][:n_pages]
-    for i, url in enumerate(picks):
+    followed = False
+    i = 0
+    while i < len(picks):
+        url = picks[i]
         r = site.get(url)
         if r is None:
             lines.append(f"- {url} -> no response / blocked")
+            i += 1
             continue
         (out / f"{i:02d}.html").write_text(r.text)
         d = describe(r.text)
+        if i == 0 and not (productish or pages) and not followed:
+            # no sitemap: follow a few category/product links from the homepage
+            host = urlparse(r.url).netloc
+            extra = [urljoin(r.url, u) for u in d["links"]]
+            picks += [u for u in dict.fromkeys(extra) if urlparse(u).netloc == host and site.allowed(u)][:n_pages]
+            followed = True
         lines.append(f"- {url} -> {r.status_code} {r.headers.get('content-type','')[:30]} {d['bytes']}B "
                      f"title={d['title']!r}")
         lines.append(f"    signals={d['signals']} ld+json={d['ld_json_blocks']} rm_prices={d['rm_prices']}")
         if d["api_hints"]:
             lines.append(f"    api_hints={d['api_hints']}")
-        lines.append(f"    scripts={d['scripts'][:6]}")
+        for key in ("next_data_price_paths", "rsc_price_snippets", "price_text", "links"):
+            if d[key]:
+                lines.append(f"    {key}={d[key]}")
+        i += 1
     return lines
 
 
