@@ -1,0 +1,220 @@
+{
+ "asOf": "2026-09-24",
+ "stores_with_recent_prices": 1829,
+ "items_with_recent_prices": 340,
+ "median_items_per_store": 100.0,
+ "keep_per_state": 12,
+ "premise_types": [
+  {
+   "premise_type": "Borong",
+   "included": false,
+   "premises": 15
+  },
+  {
+   "premise_type": "Foodcourt",
+   "included": false,
+   "premises": 94
+  },
+  {
+   "premise_type": "Hypermarket",
+   "included": true,
+   "premises": 180
+  },
+  {
+   "premise_type": "Kedai Runcit",
+   "included": true,
+   "premises": 620
+  },
+  {
+   "premise_type": "Kedai Serbaneka",
+   "included": true,
+   "premises": 2
+  },
+  {
+   "premise_type": "Medan Selera",
+   "included": false,
+   "premises": 126
+  },
+  {
+   "premise_type": "Pasar Basah",
+   "included": false,
+   "premises": 22
+  },
+  {
+   "premise_type": "Pasar Basah ",
+   "included": false,
+   "premises": 338
+  },
+  {
+   "premise_type": "Pasar Mini",
+   "included": true,
+   "premises": 917
+  },
+  {
+   "premise_type": "Pasar Raya / Supermarket",
+   "included": true,
+   "premises": 885
+  },
+  {
+   "premise_type": "Restoran Cina",
+   "included": false,
+   "premises": 196
+  },
+  {
+   "premise_type": "Restoran India Muslim",
+   "included": false,
+   "premises": 223
+  },
+  {
+   "premise_type": "Restoran Melayu",
+   "included": false,
+   "premises": 297
+  }
+ ],
+ "chains": [
+  {
+   "chain": "Independent",
+   "stores": 1364,
+   "states": 16,
+   "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "99 Speedmart",
+   "stores": 130,
+   "states": 12,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Econsave",
+   "stores": 70,
+   "states": 13,
+   "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "Mydin",
+   "stores": 32,
+   "states": 13,
+   "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "AEON",
+   "stores": 32,
+   "states": 9,
+   "types": "hypermarket, supermarket"
+  },
+  {
+   "chain": "Giant",
+   "stores": 30,
+   "states": 9,
+   "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "TF Value-Mart",
+   "stores": 29,
+   "states": 9,
+   "types": "hypermarket, supermarket"
+  },
+  {
+   "chain": "Lotus's",
+   "stores": 23,
+   "states": 7,
+   "types": "hypermarket, supermarket"
+  },
+  {
+   "chain": "Servay",
+   "stores": 22,
+   "states": 2,
+   "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "Billion",
+   "stores": 16,
+   "states": 5,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Hero Market",
+   "stores": 12,
+   "states": 4,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Village Grocer",
+   "stores": 11,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "NSK Trade City",
+   "stores": 11,
+   "states": 5,
+   "types": "supermarket"
+  },
+  {
+   "chain": "The Store",
+   "stores": 10,
+   "states": 5,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Cold Storage",
+   "stores": 8,
+   "states": 5,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Jaya Grocer",
+   "stores": 8,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
+   "chain": "Pacific",
+   "stores": 7,
+   "states": 6,
+   "types": "hypermarket, supermarket"
+  },
+  {
+   "chain": "FamilyMart",
+   "stores": 5,
+   "states": 4,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Mercato",
+   "stores": 5,
+   "states": 3,
+   "types": "hypermarket, supermarket"
+  },
+  {
+   "chain": "KK Mart",
+   "stores": 2,
+   "states": 2,
+   "types": "minimart, supermarket"
+  },
+  {
+   "chain": "Sunshine",
+   "stores": 2,
+   "states": 1,
+   "types": "supermarket"
+  }
+ ],
+ "states": {
+  "Sarawak": 198,
+  "Johor": 193,
+  "Kelantan": 175,
+  "Pahang": 174,
+  "Sabah": 166,
+  "W.P. Kuala Lumpur": 164,
+  "Perak": 158,
+  "Terengganu": 119,
+  "Selangor": 110,
+  "Pulau Pinang": 106,
+  "Kedah": 97,
+  "Negeri Sembilan": 52,
+  "Melaka": 46,
+  "Perlis": 31,
+  "W.P. Putrajaya": 26,
+  "W.P. Labuan": 14
+ }
+}
