@@ -58,6 +58,21 @@ CHAINS = [
     (r"the store", "The Store"), (r"pacific", "Pacific"), (r"billion", "Billion"),
     (r"servay", "Servay"), (r"sunshine", "Sunshine"), (r"cold storage", "Cold Storage"),
     (r"mercato", "Mercato"), (r"family ?mart", "FamilyMart"),
+    (r"\btesco\b", "Lotus's"),  # Tesco Malaysia became Lotus's; some names still say Tesco
+    # regional chains (several outlets each in PriceCatcher)
+    (r"tunas manja", "Tunas Manja"), (r"segi fresh", "Segi Fresh"), (r"segi cash", "Segi Cash & Carry"),
+    (r"pantai tim[uo]r", "Pantai Timur"), (r"bataras", "Bataras"), (r"pasaraya bs\b", "Pasaraya BS"),
+    (r"\bbs freshmart", "BS Freshmart"), (r"\bbs supermart", "BS Supermart"), (r"pasaraya lyc", "Pasaraya LYC"),
+    (r"maslee", "Maslee"), (r"save mini", "Save Mini Market"), (r"\btmg (mart|express)", "TMG Mart"),
+    (r"cck fresh", "CCK Fresh Mart"), (r"\bwls enterprise", "WLS"), (r"econjaya", "Econjaya"),
+    (r"econo jaya", "Econo Jaya"), (r"pasaraya econo\b", "Pasaraya Econo"), (r"everwin", "Everwin"),
+    (r"\bty pasaraya", "TY Pasaraya"), (r"\bsk fresh", "SK Fresh"), (r"pasaraya pkt", "Pasaraya PKT"),
+    (r"milimewa", "Milimewa"), (r"well ?mart", "Well Mart"), (r"nirwana maju", "Nirwana Maju"),
+    (r"kim hock", "Kim Hock"), (r"new world mart", "New World Mart"), (r"lepapa", "Lepapa"),
+    (r"target supermarket", "Target Supermarket"), (r"\b88 freshmart", "88 Freshmart"), (r"\bls mart", "LS Mart"),
+    (r"k-ceria", "K-Ceria"), (r"sing kwong", "Sing Kwong"), (r"nam leong", "Nam Leong"), (r"\bmds mart", "MDS Mart"),
+    (r"city fresh mart", "City Fresh Mart"), (r"instar", "Instar"), (r"doremart", "Doremart"),
+    (r"family store", "Family Store"), (r"\bbig 10\b", "Big 10"),
 ]
 
 
