@@ -163,10 +163,15 @@ def main():
                     .drop_duplicates(["item_code", "premise_code"], keep="last"))
     write_coverage(all_premises, premises, prices, newest)
 
-    prices = prices.merge(premises[["premise_code", "state"]], on="premise_code")
-    prices = (prices.sort_values("price")
-                    .groupby(["item_code", "state"], sort=False)
-                    .head(KEEP_PER_STATE))
+    prices = prices.merge(premises[["premise_code", "state", "premise"]], on="premise_code")
+    prices["chain"] = prices["premise"].astype(str).map(chain_of)
+    prices = prices.sort_values("price")
+    # keep the cheapest N stores per item per state, plus each chain's
+    # cheapest store there, so every chain shows up on the site
+    cheapest = prices.groupby(["item_code", "state"], sort=False).head(KEEP_PER_STATE)
+    per_chain = (prices[prices["chain"] != "Independent"]
+                 .groupby(["item_code", "state", "chain"], sort=False).head(1))
+    prices = pd.concat([cheapest, per_chain]).drop_duplicates(["item_code", "premise_code"])
 
     used_items = items[items["item_code"].isin(prices["item_code"])]
     used_prem = premises[premises["premise_code"].isin(prices["premise_code"])]
@@ -239,7 +244,7 @@ def write_coverage(all_premises, premises, prices, newest):
     md = [f"## PriceCatcher coverage ({report['asOf']})", "",
           f"- Stores with prices in the last {MAX_AGE_DAYS} days: **{report['stores_with_recent_prices']}**",
           f"- Products: **{report['items_with_recent_prices']}** (median {report['median_items_per_store']:.0f} per store)",
-          f"- Site keeps the cheapest **{KEEP_PER_STATE}** stores per product per state", "",
+          f"- Site keeps the cheapest **{KEEP_PER_STATE}** stores per product per state, plus each chain's cheapest store", "",
           "### Store types in PriceCatcher", "", "| premise_type | premises | shown on site |", "|---|---:|---|"]
     md += [f"| {r['premise_type']} | {r['premises']} | {'✅' if r['included'] else '—'} |" for r in report["premise_types"]]
     md += ["", "### Chains", "", "| chain | stores | states | types |", "|---|---:|---:|---|"]
