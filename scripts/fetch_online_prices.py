@@ -462,11 +462,82 @@ def merge(results, previous, today, keep_retailers):
     return sorted(out, key=lambda p: (p["category"], p["name"]))
 
 
+# ---------------------------------------------------------------------------
+# diagnose: look at how a shop publishes prices, to write a custom adapter
+# ---------------------------------------------------------------------------
+SIGNALS = {
+    "json-ld Product": r'"@type"\s*:\s*"Product"',
+    "Next.js (__NEXT_DATA__)": r"__NEXT_DATA__",
+    "Nuxt (__NUXT__)": r"__NUXT__",
+    "initial state blob": r"__INITIAL_STATE__|__PRELOADED_STATE__|__APOLLO_STATE__",
+    "Shopify": r"cdn\.shopify\.com|Shopify\.theme",
+    "Magento": r"Magento_|mage/cookies|data-mage-init",
+    "WooCommerce": r"woocommerce",
+    "VTEX": r"vtex",
+    "Salesforce Commerce": r"demandware|dw/shop",
+    "React root": r'id="root"|id="__next"|data-reactroot',
+    "Angular": r"ng-version",
+    "Vue": r"data-v-[0-9a-f]{6}|id=\"app\"",
+    "Cloudflare challenge": r"cf-chl|challenge-platform|Just a moment",
+}
+PRICE_TEXT = re.compile(r"RM\s?\d{1,4}(?:[.,]\d{2})")
+API_HINT = re.compile(r"""["'](https?://[^"'\s]*(?:/api/|graphql|/rest/|/v1/|/v2/)[^"'\s]*|/(?:api|graphql|rest)/[^"'\s]{0,80})["']""", re.I)
+SCRIPT_SRC = re.compile(r"<script[^>]+src=[\"']([^\"']+)", re.I)
+TITLE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
+
+
+def describe(page_html):
+    found = [name for name, rx in SIGNALS.items() if re.search(rx, page_html, re.I)]
+    title = TITLE.search(page_html)
+    return {
+        "title": html.unescape(title.group(1)).strip()[:90] if title else "",
+        "bytes": len(page_html),
+        "signals": found,
+        "rm_prices": PRICE_TEXT.findall(page_html)[:6],
+        "ld_json_blocks": len(LDJSON_RE.findall(page_html)),
+        "api_hints": list(dict.fromkeys(API_HINT.findall(page_html)))[:10],
+        "scripts": [u for u in SCRIPT_SRC.findall(page_html)][:12],
+    }
+
+
+def diagnose(site, out_dir, n_pages=5):
+    out = out_dir / re.sub(r"[^A-Za-z0-9]+", "_", site.name)
+    out.mkdir(parents=True, exist_ok=True)
+    lines = [f"### {site.name} ({site.base})"]
+    robots_sitemaps = site.load_robots()
+    if not site.responded:
+        site.get(site.base + "/")
+    if not site.responded:
+        return lines + ["unreachable"]
+    if not site.allowed(site.base + "/"):
+        return lines + ["robots.txt disallows crawling; not inspected"]
+    lines.append(f"robots sitemaps: {robots_sitemaps[:5]} | crawl delay used: {site.delay}s")
+    pages = site.sitemap_urls(robots_sitemaps)
+    productish = [u for u in pages if re.search(r"/(products?|p|item|sku)/|-p-\d|\.html$|/\d{5,}", u, re.I)]
+    lines.append(f"sitemap urls: {len(pages)}, product-looking: {len(productish)}; samples: {(productish or pages)[:3]}")
+    picks = [site.base + "/"] + [u for u in (productish or pages) if site.allowed(u)][:n_pages]
+    for i, url in enumerate(picks):
+        r = site.get(url)
+        if r is None:
+            lines.append(f"- {url} -> no response / blocked")
+            continue
+        (out / f"{i:02d}.html").write_text(r.text)
+        d = describe(r.text)
+        lines.append(f"- {url} -> {r.status_code} {r.headers.get('content-type','')[:30]} {d['bytes']}B "
+                     f"title={d['title']!r}")
+        lines.append(f"    signals={d['signals']} ld+json={d['ld_json_blocks']} rm_prices={d['rm_prices']}")
+        if d["api_hints"]:
+            lines.append(f"    api_hints={d['api_hints']}")
+        lines.append(f"    scripts={d['scripts'][:6]}")
+    return lines
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--only", help="run just this retailer (ignores 'enabled')")
     ap.add_argument("--max-pages", type=int, default=MAX_PAGES)
     ap.add_argument("--dry-run", action="store_true", help="print results, don't write data/online.json")
+    ap.add_argument("--diagnose", metavar="DIR", help="save a few pages per retailer to DIR and print what they contain")
     args = ap.parse_args()
 
     retailers = json.loads(CONFIG.read_text())["retailers"]
@@ -488,6 +559,16 @@ def main():
             print(msg, flush=True)
 
     deadline = time.time() + TIME_BUDGET
+    if args.diagnose:
+        out_dir = Path(args.diagnose)
+        sites = [Site(r, 10, deadline, log) for r in retailers]
+        with ThreadPoolExecutor(max_workers=max(1, len(sites))) as pool:
+            reports = list(pool.map(lambda s: diagnose(s, out_dir), sites))
+        text = "\n".join("\n".join(r) + "\n" for r in reports)
+        log(text)
+        (out_dir / "report.txt").write_text(text)
+        return
+
     sites = [Site(r, args.max_pages, deadline, log) for r in retailers]
     log(f"Crawling {len(sites)} retailer(s), up to {args.max_pages} pages each: "
         + ", ".join(s.name for s in sites))

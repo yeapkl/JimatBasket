@@ -12,6 +12,10 @@ on:
         description: "Max pages per retailer"
         required: false
         default: "3000"
+      diagnose:
+        description: "Diagnose only: inspect a few pages per retailer, save them as a run artifact, change nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,7 +34,22 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests
+      - name: Diagnose retailer websites
+        if: ${{ inputs.diagnose }}
+        run: |
+          if [ -n "${{ inputs.only }}" ]; then
+            python scripts/fetch_online_prices.py --diagnose diagnose --only "${{ inputs.only }}"
+          else
+            python scripts/fetch_online_prices.py --diagnose diagnose
+          fi
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.diagnose }}
+        with:
+          name: retailer-diagnose
+          path: diagnose/
+          retention-days: 7
       - name: Collect prices from retailer websites
+        if: ${{ !inputs.diagnose }}
         env:
           ONLINE_MAX_PAGES: ${{ inputs.max_pages || '3000' }}
         run: |
@@ -40,6 +59,7 @@ jobs:
             python scripts/fetch_online_prices.py
           fi
       - name: Commit if changed
+        if: ${{ !inputs.diagnose }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

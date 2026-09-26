@@ -15,7 +15,8 @@
     {
       "name": "AEON",
       "base": "https://myaeon2go.com",
-      "enabled": true
+      "enabled": false,
+      "note": "Off: site blocks automated requests (403/429 on every product page)."
     },
     {
       "name": "Jaya Grocer",
