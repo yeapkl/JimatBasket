@@ -18,16 +18,16 @@ concurrency:
   group: deploy-gcp
   cancel-in-progress: false
 
-# Settings come from repository Variables (Settings -> Secrets and variables
-# -> Actions -> Variables). Secrets with the same names also work.
+# Settings come from repository Variables
+# (Settings -> Secrets and variables -> Actions -> Variables tab).
 env:
-  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
-  REGION: ${{ vars.GCP_REGION || secrets.GCP_REGION }}
-  SERVICE: ${{ vars.CLOUD_RUN_SERVICE || secrets.CLOUD_RUN_SERVICE }}
-  AR_REPO: ${{ vars.GCP_AR_REPO || secrets.GCP_AR_REPO }}
-  WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER || secrets.GCP_WIF_PROVIDER }}
-  DEPLOY_SA: ${{ vars.GCP_DEPLOY_SA || secrets.GCP_DEPLOY_SA }}
-  RUNTIME_SA: ${{ vars.GCP_RUNTIME_SA || secrets.GCP_RUNTIME_SA }}
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+  AR_REPO: ${{ vars.GCP_AR_REPO }}
+  WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER }}
+  DEPLOY_SA: ${{ vars.GCP_DEPLOY_SA }}
+  RUNTIME_SA: ${{ vars.GCP_RUNTIME_SA }}
 
 jobs:
   deploy:
