@@ -1,8 +1,8 @@
 {
- "asOf": "2026-09-24",
- "stores_with_recent_prices": 1829,
- "items_with_recent_prices": 340,
- "median_items_per_store": 100.0,
+ "asOf": "2026-10-11",
+ "stores_with_recent_prices": 1826,
+ "items_with_recent_prices": 318,
+ "median_items_per_store": 85.0,
  "keep_per_state": 12,
  "premise_types": [
   {
@@ -53,7 +53,7 @@
   {
    "premise_type": "Pasar Raya / Supermarket",
    "included": true,
-   "premises": 885
+   "premises": 888
   },
   {
    "premise_type": "Restoran Cina",
@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1060,
+   "stores": 1056,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -271,10 +271,10 @@
    "types": "supermarket"
   },
   {
-   "chain": "Econjaya",
+   "chain": "Pasaraya PKT",
    "stores": 6,
    "states": 2,
-   "types": "supermarket"
+   "types": "minimart, supermarket"
   },
   {
    "chain": "TY Pasaraya",
@@ -295,6 +295,12 @@
    "types": "minimart, supermarket"
   },
   {
+   "chain": "Econjaya",
+   "stores": 6,
+   "states": 2,
+   "types": "supermarket"
+  },
+  {
    "chain": "BS Freshmart",
    "stores": 6,
    "states": 4,
@@ -307,21 +313,15 @@
    "types": "minimart, supermarket"
   },
   {
-   "chain": "BS Supermart",
-   "stores": 5,
-   "states": 1,
-   "types": "minimart, supermarket"
-  },
-  {
    "chain": "Big 10",
    "stores": 5,
    "states": 3,
    "types": "minimart, supermarket"
   },
   {
-   "chain": "Pasaraya PKT",
+   "chain": "BS Supermart",
    "stores": 5,
-   "states": 2,
+   "states": 1,
    "types": "minimart, supermarket"
   },
   {
@@ -434,12 +434,12 @@
   }
  ],
  "states": {
-  "Sarawak": 198,
+  "Sarawak": 195,
   "Johor": 193,
   "Kelantan": 175,
   "Pahang": 174,
   "Sabah": 166,
-  "W.P. Kuala Lumpur": 164,
+  "W.P. Kuala Lumpur": 165,
   "Perak": 158,
   "Terengganu": 119,
   "Selangor": 110,
@@ -447,7 +447,7 @@
   "Kedah": 97,
   "Negeri Sembilan": 52,
   "Melaka": 46,
-  "Perlis": 31,
+  "Perlis": 30,
   "W.P. Putrajaya": 26,
   "W.P. Labuan": 14
  }
