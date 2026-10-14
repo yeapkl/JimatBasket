@@ -1,8 +1,8 @@
 {
- "asOf": "2026-10-12",
- "stores_with_recent_prices": 1837,
- "items_with_recent_prices": 319,
- "median_items_per_store": 92.0,
+ "asOf": "2026-10-13",
+ "stores_with_recent_prices": 1827,
+ "items_with_recent_prices": 316,
+ "median_items_per_store": 85.0,
  "keep_per_state": 12,
  "premise_types": [
   {
@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1065,
+   "stores": 1056,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -379,10 +379,10 @@
    "types": "supermarket"
   },
   {
-   "chain": "City Fresh Mart",
+   "chain": "K-Ceria",
    "stores": 3,
-   "states": 1,
-   "types": "minimart"
+   "states": 2,
+   "types": "supermarket"
   },
   {
    "chain": "Sing Kwong",
@@ -391,10 +391,10 @@
    "types": "supermarket"
   },
   {
-   "chain": "K-Ceria",
+   "chain": "Nam Leong",
    "stores": 3,
-   "states": 2,
-   "types": "supermarket"
+   "states": 1,
+   "types": "minimart, supermarket"
   },
   {
    "chain": "Instar",
@@ -409,16 +409,16 @@
    "types": "supermarket"
   },
   {
-   "chain": "Nam Leong",
-   "stores": 3,
-   "states": 1,
-   "types": "minimart, supermarket"
-  },
-  {
    "chain": "KK Mart",
    "stores": 2,
    "states": 2,
    "types": "minimart, supermarket"
+  },
+  {
+   "chain": "City Fresh Mart",
+   "stores": 2,
+   "states": 1,
+   "types": "minimart"
   },
   {
    "chain": "New World Mart",
@@ -436,15 +436,15 @@
  "states": {
   "Sarawak": 196,
   "Johor": 193,
-  "Kelantan": 177,
-  "Pahang": 175,
-  "Sabah": 172,
-  "W.P. Kuala Lumpur": 165,
+  "Kelantan": 175,
+  "Pahang": 171,
+  "Sabah": 171,
+  "W.P. Kuala Lumpur": 164,
   "Perak": 158,
-  "Terengganu": 119,
+  "Terengganu": 118,
   "Selangor": 110,
   "Pulau Pinang": 106,
-  "Kedah": 97,
+  "Kedah": 96,
   "Negeri Sembilan": 52,
   "Melaka": 46,
   "Perlis": 31,
