@@ -1,6 +1,6 @@
 {
- "asOf": "2026-10-13",
- "stores_with_recent_prices": 1827,
+ "asOf": "2026-10-14",
+ "stores_with_recent_prices": 1825,
  "items_with_recent_prices": 316,
  "median_items_per_store": 85.0,
  "keep_per_state": 12,
@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1056,
+   "stores": 1055,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -104,7 +104,7 @@
   },
   {
    "chain": "AEON",
-   "stores": 32,
+   "stores": 31,
    "states": 9,
    "types": "hypermarket, supermarket"
   },
@@ -439,9 +439,9 @@
   "Kelantan": 175,
   "Pahang": 171,
   "Sabah": 171,
-  "W.P. Kuala Lumpur": 164,
+  "W.P. Kuala Lumpur": 163,
   "Perak": 158,
-  "Terengganu": 118,
+  "Terengganu": 117,
   "Selangor": 110,
   "Pulau Pinang": 106,
   "Kedah": 96,
