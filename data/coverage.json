@@ -1,8 +1,8 @@
 {
- "asOf": "2026-10-25",
- "stores_with_recent_prices": 1833,
- "items_with_recent_prices": 334,
- "median_items_per_store": 91.0,
+ "asOf": "2026-10-26",
+ "stores_with_recent_prices": 1835,
+ "items_with_recent_prices": 338,
+ "median_items_per_store": 104.0,
  "keep_per_state": 12,
  "premise_types": [
   {
@@ -48,7 +48,7 @@
   {
    "premise_type": "Pasar Mini",
    "included": true,
-   "premises": 924
+   "premises": 925
   },
   {
    "premise_type": "Pasar Raya / Supermarket",
@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1062,
+   "stores": 1063,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -199,16 +199,16 @@
    "types": "minimart"
   },
   {
+   "chain": "CCK Fresh Mart",
+   "stores": 10,
+   "states": 2,
+   "types": "minimart"
+  },
+  {
    "chain": "The Store",
    "stores": 10,
    "states": 5,
    "types": "supermarket"
-  },
-  {
-   "chain": "CCK Fresh Mart",
-   "stores": 9,
-   "states": 1,
-   "types": "minimart"
   },
   {
    "chain": "Doremart",
@@ -437,8 +437,8 @@
   "Sarawak": 196,
   "Johor": 193,
   "Kelantan": 176,
-  "Pahang": 174,
-  "Sabah": 172,
+  "Pahang": 175,
+  "Sabah": 173,
   "W.P. Kuala Lumpur": 164,
   "Perak": 158,
   "Terengganu": 118,
