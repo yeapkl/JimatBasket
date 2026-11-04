@@ -1,8 +1,8 @@
 {
- "asOf": "2026-11-02",
- "stores_with_recent_prices": 1836,
+ "asOf": "2026-11-03",
+ "stores_with_recent_prices": 1835,
  "items_with_recent_prices": 337,
- "median_items_per_store": 104.5,
+ "median_items_per_store": 101.0,
  "keep_per_state": 12,
  "premise_types": [
   {
@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1064,
+   "stores": 1063,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -434,7 +434,7 @@
   }
  ],
  "states": {
-  "Sarawak": 196,
+  "Sarawak": 195,
   "Johor": 193,
   "Kelantan": 176,
   "Pahang": 175,
