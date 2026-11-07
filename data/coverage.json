@@ -1,8 +1,8 @@
 {
- "asOf": "2026-11-05",
+ "asOf": "2026-11-06",
  "stores_with_recent_prices": 1836,
  "items_with_recent_prices": 339,
- "median_items_per_store": 103.5,
+ "median_items_per_store": 102.5,
  "keep_per_state": 12,
  "premise_types": [
   {
