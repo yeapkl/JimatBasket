@@ -1,6 +1,6 @@
 {
- "asOf": "2026-11-10",
- "stores_with_recent_prices": 1830,
+ "asOf": "2026-11-11",
+ "stores_with_recent_prices": 1829,
  "items_with_recent_prices": 318,
  "median_items_per_store": 90.0,
  "keep_per_state": 12,
@@ -74,7 +74,7 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1058,
+   "stores": 1057,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
   },
@@ -448,7 +448,7 @@
   "Negeri Sembilan": 52,
   "Melaka": 46,
   "Perlis": 32,
-  "W.P. Putrajaya": 27,
+  "W.P. Putrajaya": 26,
   "W.P. Labuan": 14
  }
 }
