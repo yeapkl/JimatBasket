@@ -1,8 +1,8 @@
 {
- "asOf": "2026-11-22",
- "stores_with_recent_prices": 1752,
- "items_with_recent_prices": 314,
- "median_items_per_store": 89.0,
+ "asOf": "2026-11-23",
+ "stores_with_recent_prices": 1830,
+ "items_with_recent_prices": 334,
+ "median_items_per_store": 100.0,
  "keep_per_state": 12,
  "premise_types": [
   {
@@ -74,21 +74,21 @@
  "chains": [
   {
    "chain": "Independent",
-   "stores": 1048,
+   "stores": 1059,
    "states": 16,
    "types": "hypermarket, minimart, supermarket"
+  },
+  {
+   "chain": "99 Speedmart",
+   "stores": 131,
+   "states": 13,
+   "types": "minimart, supermarket"
   },
   {
    "chain": "Econsave",
    "stores": 70,
    "states": 13,
    "types": "hypermarket, minimart, supermarket"
-  },
-  {
-   "chain": "99 Speedmart",
-   "stores": 64,
-   "states": 10,
-   "types": "minimart, supermarket"
   },
   {
    "chain": "Lotus's",
@@ -434,20 +434,20 @@
   }
  ],
  "states": {
-  "Sarawak": 194,
-  "Johor": 184,
+  "Sarawak": 196,
+  "Johor": 193,
   "Kelantan": 176,
-  "Sabah": 172,
-  "W.P. Kuala Lumpur": 159,
-  "Pahang": 154,
-  "Perak": 137,
-  "Terengganu": 114,
-  "Selangor": 105,
-  "Pulau Pinang": 99,
-  "Kedah": 94,
-  "Negeri Sembilan": 48,
+  "Pahang": 174,
+  "Sabah": 173,
+  "W.P. Kuala Lumpur": 164,
+  "Perak": 157,
+  "Terengganu": 118,
+  "Selangor": 110,
+  "Pulau Pinang": 103,
+  "Kedah": 97,
+  "Negeri Sembilan": 51,
   "Melaka": 46,
-  "Perlis": 30,
+  "Perlis": 32,
   "W.P. Putrajaya": 26,
   "W.P. Labuan": 14
  }
